@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>2027 Legislative Session Dates</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    /* Ink (dark surfaces) */
+    --ink-950:#05011F;
+    --ink-900:#0A0438;
+    /* Brand */
+    --raspberry-500:#E60058;
+    --raspberry-600:#99003B;
+    --raspberry-300:#F280AB;
+    --raspberry-50:#FEF2F7;
+    --ultra-500:#4002FF;
+    --ultra-600:#2B01AA;
+    --ultra-700:#200180;
+    --ultra-50:#ECE6FF;
+    /* Slate neutrals */
+    --slate-900:#0F172A;
+    --slate-800:#1E293B;
+    --slate-700:#334155;
+    --slate-600:#475569;
+    --slate-500:#64748B;
+    --slate-400:#94A3B8;
+    --slate-200:#E2E8F0;
+    --slate-100:#F1F5F9;
+    --slate-50:#F8FAFC;
+    --white-muted:rgba(255,255,255,.55);
+    --white-faint:rgba(255,255,255,.12);
+    --white-hairline:rgba(255,255,255,.08);
+    /* Categorical tag colors (bg=50, text=700) — used for topic/category
+       chips, distinct from semantic status colors */
+    --amber-50:#FFFBE8; --amber-600:#D97706; --amber-700:#B45309;
+    --sky-50:#F0F9FF; --sky-600:#0284C7; --sky-700:#0369A1;
+    --violet-50:#F5F3FF; --violet-600:#7C3AED; --violet-700:#6D28D9;
+    --emerald-600:#059669; --emerald-700:#047857;
+    /* Radius scale */
+    --radius-sm:4px; --radius-md:6px; --radius-lg:8px;
+    --radius-xl:10px; --radius-2xl:14px; --radius-full:9999px;
+    /* Elevation */
+    --elev-1:0 1px 0 rgba(15,23,42,.04), 0 1px 3px rgba(15,23,42,.06);
+    --elev-2:0 2px 0 rgba(15,23,42,.04), 0 12px 32px -12px rgba(15,23,42,.18), 0 4px 8px -4px rgba(15,23,42,.08);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:var(--ink-950);
+    color:var(--slate-200);
+    font-family:'Public Sans',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .page{max-width:1080px;margin:0 auto;padding:0 20px 80px;}
+
+  /* HEADER */
+  .hero{
+    padding:56px 20px 40px;
+    margin-bottom:20px;
+  }
+  .hero-inner{max-width:1080px;margin:0 auto;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:.15em;
+    text-transform:uppercase;
+    color:var(--raspberry-300);
+    margin-bottom:14px;
+  }
+  h1{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:clamp(30px,4.5vw,40px);
+    line-height:1.05;
+    margin:0 0 14px;
+    letter-spacing:-0.025em;
+    color:#fff;
+  }
+  .hero p{
+    max-width:560px;
+    color:var(--white-muted);
+    font-size:15px;
+    line-height:1.65;
+    margin:0;
+  }
+
+  /* CONTROLS */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    margin-bottom:24px;
+  }
+  .view-toggle{
+    display:flex;
+    background:var(--white-faint);
+    border:1px solid var(--white-hairline);
+    border-radius:var(--radius-full);
+    padding:3px;
+  }
+  .view-toggle button{
+    border:none;
+    background:transparent;
+    padding:8px 18px;
+    font-family:'Public Sans',sans-serif;
+    font-size:14px;
+    font-weight:700;
+    color:var(--white-muted);
+    border-radius:var(--radius-full);
+    cursor:pointer;
+    transition:all .15s ease;
+  }
+  .view-toggle button.active{
+    background:var(--raspberry-500);
+    color:#fff;
+  }
+  .search-wrap{position:relative;flex:1;min-width:200px;}
+  .search-wrap input{
+    width:100%;
+    padding:9px 14px 9px 34px;
+    border-radius:var(--radius-full);
+    border:1px solid var(--slate-200);
+    background:#fff;
+    font-family:'Public Sans',sans-serif;
+    font-size:14px;
+    color:var(--slate-900);
+  }
+  .search-wrap input:focus{outline:2px solid var(--ultra-500);outline-offset:1px;}
+  .search-wrap svg{
+    position:absolute;left:12px;top:50%;transform:translateY(-50%);
+    width:14px;height:14px;stroke:var(--slate-500);
+  }
+  .chip{
+    border:1px solid var(--white-hairline);
+    background:var(--white-faint);
+    padding:8px 14px;
+    border-radius:var(--radius-full);
+    font-family:'Public Sans',sans-serif;
+    font-size:13px;
+    font-weight:600;
+    color:var(--white-muted);
+    cursor:pointer;
+    white-space:nowrap;
+    transition:all .15s ease;
+  }
+  .chip.active{
+    background:var(--ultra-600);
+    border-color:var(--ultra-600);
+    color:#fff;
+  }
+  .result-count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    color:var(--white-muted);
+    margin-bottom:20px;
+  }
+
+  /* MONTH VIEW */
+  .month-section{margin-bottom:36px;}
+  .month-head{
+    position:sticky;
+    top:0;
+    z-index:5;
+    background:var(--ink-900);
+    display:flex;
+    align-items:baseline;
+    gap:12px;
+    padding:14px 16px 12px;
+    margin:0 -16px 16px;
+    border-bottom:1px solid var(--white-hairline);
+  }
+  .month-head h2{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:24px;
+    letter-spacing:-0.02em;
+    margin:0;
+    color:#fff;
+  }
+  .month-head h2 .count{
+    font-family:'JetBrains Mono',monospace;
+    font-size:15px;
+    font-weight:400;
+    color:var(--white-muted);
+    margin-left:4px;
+  }
+  .card-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
+    gap:16px;
+  }
+
+  .state-card{
+    background:#fff;
+    border:1px solid var(--slate-200);
+    border-radius:var(--radius-2xl);
+    padding:12px;
+    box-shadow:var(--elev-1);
+    transition:box-shadow .18s ease, transform .18s ease;
+  }
+  .state-card:hover{box-shadow:var(--elev-2);transform:translateY(-1px);}
+  .state-row-top{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-start;
+    margin-bottom:8px;
+  }
+  .state-name{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:17px;
+    letter-spacing:-0.01em;
+    color:var(--slate-900);
+  }
+  .badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+  .badge{
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding:2px 7px;
+    border-radius:var(--radius-sm);
+    font-weight:500;
+  }
+  .badge.carry{background:var(--violet-50);color:var(--violet-700);border:1px solid rgba(124,58,237,.25);}
+
+  /* Prefile/crossover: hollow outlined tags above the meter, using the
+     categorical-tag color system (not semantic status colors) — each
+     phase appears exactly once per card. Named .tag (not .chip) so it
+     never collides with the filter chip buttons above. */
+  .chip-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    margin:8px 0 0;
+  }
+  .tag{
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10px;
+    font-weight:500;
+    padding:3px 9px;
+    border-radius:var(--radius-full);
+    background:transparent;
+    white-space:nowrap;
+  }
+  .tag.prefile{color:var(--amber-700);border:1px solid var(--amber-600);}
+  .tag.crossover{color:var(--sky-700);border:1px solid var(--sky-600);}
+  .tag .cdot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;}
+
+  /* year meter: a fixed Jan–Dec 2027 track. Only the portion the
+     legislature is actually in session gets filled; the rest stays a
+     light, low-opacity track so position-in-year is always legible. */
+  .yearmeter{
+    position:relative;
+    height:7px;
+    border-radius:var(--radius-sm);
+    background:var(--slate-100);
+    margin:2px 0 6px;
+    overflow:hidden;
+  }
+  .yearmeter .fill{
+    position:absolute;
+    top:0;bottom:0;
+    background:var(--emerald-600);
+    border-radius:var(--radius-sm);
+  }
+  .meter-dates{
+    display:flex;
+    justify-content:space-between;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--slate-800);
+  }
+  .table-meter{width:140px;margin:0;}
+
+  /* duration caption: visually separated from the dates above it with its
+     own top border + spacing, so it reads as a distinct secondary stat
+     instead of crowding the meter. */
+  .days-caption{
+    margin-top:10px;
+    padding-top:8px;
+    border-top:1px solid var(--slate-100);
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    color:var(--slate-500);
+  }
+  .days-caption b{color:var(--slate-700);font-weight:600;}
+
+  /* TABLE VIEW */
+  .table-wrap{overflow-x:auto;border:1px solid var(--slate-200);border-radius:var(--radius-lg);background:#fff;}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th,td{padding:11px 14px;text-align:left;white-space:nowrap;}
+  thead th{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    font-weight:500;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--slate-500);
+    border-bottom:1px solid var(--slate-100);
+    cursor:pointer;
+    user-select:none;
+  }
+  thead th:hover{color:var(--ultra-600);}
+  thead th.sorted{color:var(--ultra-600);}
+  tbody tr{border-bottom:1px solid var(--slate-100);}
+  tbody tr:hover{background:var(--slate-50);}
+  tbody tr:last-child{border-bottom:none;}
+  td.state{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:var(--slate-900);}
+  td.mono{font-family:'JetBrains Mono',monospace;color:var(--slate-500);}
+  .yes{color:var(--slate-700);font-weight:600;}
+  .no{color:var(--slate-300);}
+
+  .note{
+    margin-top:40px;
+    padding:16px 18px;
+    background:var(--ink-900);
+    border-left:3px solid var(--amber-600);
+    border-radius:var(--radius-md);
+    font-size:13px;
+    color:var(--white-muted);
+    line-height:1.6;
+  }
+
+  @media (max-width:640px){
+    .hero{padding:40px 16px 32px;}
+    .month-head{margin-left:-16px;margin-right:-16px;}
+    thead{display:none;}
+    table, tbody, tr, td{display:block;width:100%;}
+    tbody tr{padding:10px 14px;border-bottom:1px solid var(--slate-100);}
+    td{padding:2px 0;white-space:normal;}
+    td.state{font-size:16px;margin-bottom:4px;}
+    td:before{
+      content:attr(data-label);
+      font-family:'JetBrains Mono',monospace;
+      font-size:10px;
+      text-transform:uppercase;
+      color:var(--slate-500);
+      display:inline-block;
+      width:110px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-inner">
+    <div class="eyebrow">2027 Legislative Calendar</div>
+    <h1>When state legislatures<br>convene in 2027</h1>
+    <p>Prefiling, convene, crossover, and adjournment dates for all 50 states — browsable by month or by state, with live filtering.</p>
+  </div>
+</div>
+
+<div class="page">
+
+  <div class="controls">
+    <div class="view-toggle">
+      <button id="btn-month" class="active">By Month</button>
+      <button id="btn-state">By State</button>
+    </div>
+    <div class="search-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+      <input id="search" type="text" placeholder="Search state…">
+    </div>
+    <button class="chip" id="chip-prefile">Has prefiling</button>
+    <button class="chip" id="chip-carry">Carries over to '28</button>
+  </div>
+
+  <div class="result-count" id="result-count"></div>
+
+  <div id="month-view"></div>
+  <div id="state-view" style="display:none;">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th data-sort="name">State</th>
+            <th>In Session</th>
+            <th data-sort="prefile">Prefile</th>
+            <th data-sort="start">Convene</th>
+            <th data-sort="crossover">Crossover</th>
+            <th data-sort="end">Adjourn</th>
+            <th data-sort="carry27">Carries to '28</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="note">
+    Prototype note — convene/adjourn dates are taken directly from the source PDF for all 50 states. Intro-deadline and crossover fields were only reliably extractable for states where the source table listed them explicitly; the remaining fields (prefile, carryover) should be spot-checked against the original before this goes live. This file is a functional pattern demo, not final Framer markup.
+  </div>
+
+</div>
+
+<script>
+const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+const data = [
+{n:"Alabama",start:"2027-02-02",end:"2027-05-13",prefile:"2026-12-01",carry26:false,carry27:false},
+{n:"Alaska",start:"2027-01-19",end:"2027-05-19",prefile:"2027-01-08",carry26:false,carry27:true},
+{n:"Arizona",start:"2027-04-11",end:"2027-05-21",prefile:"2026-11-15",carry26:false,carry27:false},
+{n:"Arkansas",start:"2027-01-11",end:"2027-04-28",prefile:"2026-11-15",carry26:false,carry27:false},
+{n:"California",start:"2026-12-07",end:"2027-09-10",crossover:"2027-06-04",carry26:false,carry27:true},
+{n:"Colorado",start:"2027-01-11",end:"2027-05-10",prefile:"2026-12-01",carry26:false,carry27:false},
+{n:"Connecticut",start:"2027-01-06",end:"2027-06-09",carry26:false,carry27:false},
+{n:"Delaware",start:"2027-01-12",end:"2027-06-30",prefile:"2026-12-15",carry26:false,carry27:true},
+{n:"Florida",start:"2027-03-02",end:"2027-04-30",prefile:"2026-08-01",carry26:false,carry27:false},
+{n:"Georgia",start:"2027-01-11",end:"2027-03-31",prefile:"2026-11-15",carry26:false,carry27:true},
+{n:"Hawaii",start:"2027-01-20",end:"2027-05-07",prefile:"2027-01-13",carry26:false,carry27:true},
+{n:"Idaho",start:"2027-01-11",end:"2027-04-02",carry26:false,carry27:false},
+{n:"Illinois",start:"2027-01-13",end:"2027-05-31",prefile:"2026-12-03",carry26:false,carry27:true},
+{n:"Indiana",start:"2027-01-12",end:"2027-04-29",prefile:"2026-11-17",carry26:false,carry27:false},
+{n:"Iowa",start:"2027-01-11",end:"2027-04-30",crossover:"2027-03-19",prefile:"2026-12-01",carry26:false,carry27:true},
+{n:"Kansas",start:"2027-01-11",end:"2027-05-07",prefile:"2026-11-04",carry26:false,carry27:true},
+{n:"Kentucky",start:"2027-01-05",end:"2027-03-30",prefile:"2026-09-01",carry26:false,carry27:false},
+{n:"Louisiana",start:"2027-04-12",end:"2027-06-10",prefile:"2027-01-25",carry26:false,carry27:false},
+{n:"Maine",start:"2026-12-02",end:"2027-06-30",carry26:false,carry27:true},
+{n:"Maryland",start:"2027-01-13",end:"2027-04-12",prefile:"2026-11-20",carry26:false,carry27:false},
+{n:"Massachusetts",start:"2027-01-06",end:"2027-11-17",carry26:false,carry27:true},
+{n:"Michigan",start:"2027-01-13",end:"2027-12-31",carry26:false,carry27:true},
+{n:"Minnesota",start:"2027-01-12",end:"2027-05-17",carry26:false,carry27:true},
+{n:"Mississippi",start:"2027-01-05",end:"2027-05-10",prefile:"2026-11-01",carry26:false,carry27:false},
+{n:"Missouri",start:"2027-01-06",end:"2027-05-14",prefile:"2026-12-01",carry26:false,carry27:false},
+{n:"Montana",start:"2027-01-04",end:"2027-04-30",prefile:"2026-05-11",carry26:false,carry27:false},
+{n:"Nebraska",start:"2027-01-06",end:"2027-06-01",carry26:false,carry27:true},
+{n:"Nevada",start:"2027-02-01",end:"2027-05-31",crossover:"2027-04-20",prefile:"2026-05-11",carry26:false,carry27:false},
+{n:"New Hampshire",start:"2027-01-06",end:"2027-06-30",crossover:"2027-01-15",prefile:"2026-09-01",carry26:false,carry27:true},
+{n:"New Jersey",start:"2027-01-12",end:"2028-01-11",carry26:true,carry27:false},
+{n:"New Mexico",start:"2027-01-19",end:"2027-03-20",prefile:"2027-01-02",carry26:false,carry27:false},
+{n:"New York",start:"2027-01-06",end:"2027-06-10",prefile:"2026-11-15",carry26:false,carry27:true},
+{n:"North Carolina",start:"2027-01-13",end:"2027-07-30",carry26:false,carry27:true},
+{n:"North Dakota",start:"2027-01-05",end:"2027-04-30",crossover:"2027-02-26",prefile:"2026-12-01",carry26:false,carry27:false},
+{n:"Ohio",start:"2027-01-04",end:"2027-12-31",carry26:false,carry27:true},
+{n:"Oklahoma",start:"2027-02-01",end:"2027-05-28",crossover:"2027-03-25",prefile:"2026-11-15",carry26:false,carry27:true},
+{n:"Oregon",start:"2027-01-11",end:"2027-06-19",prefile:"2026-12-11",carry26:false,carry27:false},
+{n:"Pennsylvania",start:"2027-01-05",end:"2027-12-31",prefile:"2026-12-15",carry26:false,carry27:true},
+{n:"Rhode Island",start:"2027-01-05",end:"2027-06-30",prefile:"2026-11-15",carry26:false,carry27:false},
+{n:"South Carolina",start:"2027-01-12",end:"2027-05-13",prefile:"2026-11-09",carry26:false,carry27:true},
+{n:"South Dakota",start:"2027-01-12",end:"2027-03-31",crossover:"2027-02-24",prefile:"2026-12-13",carry26:false,carry27:false},
+{n:"Tennessee",start:"2027-01-12",end:"2027-04-22",prefile:"2026-11-04",carry26:false,carry27:true},
+{n:"Texas",start:"2027-01-12",end:"2027-05-31",crossover:"2027-05-14",prefile:"2026-11-09",carry26:false,carry27:false},
+{n:"Utah",start:"2027-01-19",end:"2027-03-05",crossover:"2027-03-02",prefile:"2026-05-06",carry26:false,carry27:false},
+{n:"Vermont",start:"2027-01-06",end:"2027-05-14",prefile:"2026-12-15",carry26:false,carry27:true},
+{n:"Virginia",start:"2027-01-13",end:"2027-02-27",prefile:"2026-07-20",carry26:true,carry27:false},
+{n:"Washington",start:"2027-01-11",end:"2027-04-26",prefile:"2026-12-01",carry26:false,carry27:true},
+{n:"West Virginia",start:"2027-01-13",end:"2027-03-13",crossover:"2027-03-03",prefile:"2026-12-14",carry26:false,carry27:true},
+{n:"Wisconsin",start:"2027-01-04",end:"2027-12-31",carry26:false,carry27:true},
+{n:"Wyoming",start:"2027-01-12",end:"2027-03-08",crossover:"2027-02-10",prefile:"2026-05-26",carry26:false,carry27:false}
+];
+
+function fmt(d){
+  if(!d) return "—";
+  const dt = new Date(d+"T00:00:00");
+  return dt.toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'2-digit'});
+}
+function monthIndex(d){ return new Date(d+"T00:00:00").getMonth(); }
+
+let sortKey = "start", sortDir = 1, userSorted = false;
+let filters = {q:"", prefile:false, carry:false};
+
+function applyFilters(rows){
+  return rows.filter(r=>{
+    if(filters.q && !r.n.toLowerCase().includes(filters.q)) return false;
+    if(filters.prefile && !r.prefile) return false;
+    if(filters.carry && !r.carry27) return false;
+    return true;
+  });
+}
+
+function daysBetween(a,b){
+  const ms = new Date(b+"T00:00:00") - new Date(a+"T00:00:00");
+  return Math.round(ms/(1000*60*60*24));
+}
+
+// Separated from the dates visually with its own top border + spacing —
+// a secondary comparison stat, not competing with the actual dates.
+function daysStatHTML(r){
+  const n = daysBetween(r.start, r.end);
+  return `<div class="days-caption"><b>${n} days</b> · 2027 session</div>`;
+}
+
+// Prefile/crossover appear exactly once each, as hollow outlined chips
+// above the meter — never duplicated as a top-right badge too.
+function chipRowHTML(r){
+  let html = "";
+  if(r.prefile) html += `<span class="tag prefile"><i class="cdot"></i>Prefile ${fmt(r.prefile)}</span>`;
+  if(r.crossover) html += `<span class="tag crossover"><i class="cdot"></i>XO ${fmt(r.crossover)}</span>`;
+  return html ? `<div class="chip-row">${html}</div>` : "";
+}
+
+// Year meter: a fixed Jan 1 – Dec 31 2027 track. Only the in-session
+// window gets filled (clamped to the visible year for sessions that
+// start before Jan or run past Dec), so a July–Dec session visibly
+// fills the back half of the bar instead of looking identical to
+// every other state's timeline.
+const YEAR_START = new Date("2027-01-01T00:00:00").getTime();
+const YEAR_END = new Date("2027-12-31T00:00:00").getTime();
+function yearPct(dateStr){
+  const t = new Date(dateStr+"T00:00:00").getTime();
+  return Math.max(0, Math.min(100, ((t-YEAR_START)/(YEAR_END-YEAR_START))*100));
+}
+function meterHTML(r){
+  const s = yearPct(r.start), e = yearPct(r.end);
+  const w = Math.max(e - s, 1);
+  return `<div class="yearmeter"><div class="fill" style="left:${s}%;width:${w}%;"></div></div>
+    <div class="meter-dates"><span>${fmt(r.start)}</span><span>${fmt(r.end)}</span></div>`;
+}
+
+// Compact bar-only variant for the table view — no date labels, since
+// Convene/Adjourn already have their own columns there.
+function tableMeterHTML(r){
+  const s = yearPct(r.start), e = yearPct(r.end);
+  const w = Math.max(e - s, 1);
+  return `<div class="yearmeter table-meter"><div class="fill" style="left:${s}%;width:${w}%;"></div></div>`;
+}
+
+function badgesHTML(r){
+  return r.carry27 ? `<span class="badge carry">Carries '28</span>` : "";
+}
+
+function renderMonthView(rows){
+  const el = document.getElementById("month-view");
+  el.innerHTML = "";
+  for(let m=0;m<12;m++){
+    const inMonth = rows.filter(r=>monthIndex(r.start)===m);
+    if(!inMonth.length) continue;
+    inMonth.sort((a,b)=> new Date(a.start)-new Date(b.start));
+    const sec = document.createElement("div");
+    sec.className = "month-section";
+    sec.innerHTML = `<div class="month-head"><h2>${MONTHS[m]} <span class="count">(${inMonth.length})</span></h2></div>
+      <div class="card-grid">${inMonth.map(r=>`
+        <div class="state-card">
+          <div class="state-row-top">
+            <div class="state-name">${r.n}</div>
+            <div class="badges">${badgesHTML(r)}</div>
+          </div>
+          ${meterHTML(r)}
+          ${chipRowHTML(r)}
+          ${daysStatHTML(r)}
+        </div>
+      `).join("")}</div>`;
+    el.appendChild(sec);
+  }
+}
+
+function renderTableView(rows){
+  const sorted = [...rows].sort((a,b)=>{
+    let av, bv;
+    if(sortKey==="name"){av=a.n;bv=b.n;}
+    else if(sortKey==="prefile"){av=a.prefile||"9999";bv=b.prefile||"9999";}
+    else if(sortKey==="crossover"){av=a.crossover||"9999";bv=b.crossover||"9999";}
+    else if(sortKey==="carry27"){av=a.carry27?0:1;bv=b.carry27?0:1;}
+    else {av=a[sortKey];bv=b[sortKey];}
+    if(av<bv) return -1*sortDir;
+    if(av>bv) return 1*sortDir;
+    return 0;
+  });
+  const tbody = document.getElementById("table-body");
+  tbody.innerHTML = sorted.map(r=>`
+    <tr>
+      <td class="state" data-label="State">${r.n}</td>
+      <td data-label="In Session">${tableMeterHTML(r)}</td>
+      <td class="mono" data-label="Prefile">${fmt(r.prefile)}</td>
+      <td class="mono" data-label="Convene">${fmt(r.start)}</td>
+      <td class="mono" data-label="Crossover">${fmt(r.crossover)}</td>
+      <td class="mono" data-label="Adjourn">${fmt(r.end)}</td>
+      <td data-label="Carries to '28"><span class="${r.carry27?'yes':'no'}">${r.carry27?'Yes':'No'}</span></td>
+    </tr>
+  `).join("");
+  document.querySelectorAll("thead th").forEach(th=>{
+    th.classList.toggle("sorted", userSorted && th.dataset.sort===sortKey);
+  });
+}
+
+function render(){
+  const rows = applyFilters(data);
+  document.getElementById("result-count").textContent = `Showing ${rows.length} of ${data.length} states`;
+  renderMonthView(rows);
+  renderTableView(rows);
+}
+
+document.getElementById("btn-month").onclick = ()=>{
+  document.getElementById("btn-month").classList.add("active");
+  document.getElementById("btn-state").classList.remove("active");
+  document.getElementById("month-view").style.display = "";
+  document.getElementById("state-view").style.display = "none";
+};
+document.getElementById("btn-state").onclick = ()=>{
+  document.getElementById("btn-state").classList.add("active");
+  document.getElementById("btn-month").classList.remove("active");
+  document.getElementById("state-view").style.display = "";
+  document.getElementById("month-view").style.display = "none";
+};
+document.getElementById("search").addEventListener("input", e=>{
+  filters.q = e.target.value.toLowerCase();
+  render();
+});
+document.getElementById("chip-prefile").onclick = function(){
+  filters.prefile = !filters.prefile;
+  this.classList.toggle("active", filters.prefile);
+  render();
+};
+document.getElementById("chip-carry").onclick = function(){
+  filters.carry = !filters.carry;
+  this.classList.toggle("active", filters.carry);
+  render();
+};
+document.querySelectorAll("thead th").forEach(th=>{
+  th.addEventListener("click", ()=>{
+    const key = th.dataset.sort;
+    userSorted = true;
+    if(sortKey===key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+    renderTableView(applyFilters(data));
+  });
+});
+
+render();
+</script>
+
+</body>
+</html>
