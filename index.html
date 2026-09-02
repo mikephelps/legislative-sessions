@@ -72,7 +72,7 @@
   h1{
     font-family:'Plus Jakarta Sans',sans-serif;
     font-weight:700;
-    font-size:clamp(30px,4.5vw,40px);
+    font-size:clamp(36px,6vw,52px);
     line-height:1.05;
     margin:0 0 14px;
     letter-spacing:-0.025em;
@@ -179,6 +179,14 @@
     letter-spacing:-0.02em;
     margin:0;
     color:#fff;
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+  .month-head h2 svg{
+    width:20px;height:20px;
+    flex:none;
+    stroke:var(--white-muted);
   }
   .month-head h2 .count{
     font-family:'JetBrains Mono',monospace;
@@ -371,6 +379,13 @@
   tbody tr:last-child{border-bottom:none;}
   td.state{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:var(--slate-900);}
   td.mono{font-family:'JetBrains Mono',monospace;color:var(--slate-500);}
+  /* Ties the table back to the card view's color language, so switching
+     between By Month and By State doesn't feel like two different apps:
+     amber = prefile, sky = crossover, emerald = session (matches the
+     meter fill and the Session/Prefile badges on the cards). */
+  td.mono.col-prefile{color:var(--amber-700);font-weight:500;}
+  td.mono.col-crossover{color:var(--sky-700);font-weight:500;}
+  td.mono.col-session{color:var(--emerald-700);font-weight:500;}
   .yes{color:var(--slate-700);font-weight:600;}
   .no{color:var(--slate-300);}
 
@@ -620,10 +635,16 @@ function renderMonthView(rows){
   // Build one event per actionable moment — a state contributes a
   // "prefile" event (if it has one) AND a "session" event, since those
   // are two separate things to pay attention to, potentially months apart.
+  //
+  // "Has prefiling" is an event-type filter here, not a state filter: with
+  // two card types on the page now, filtering states down while still
+  // showing their (visually identical, generic) session cards made the
+  // toggle look broken — nothing on screen explained why a card survived
+  // the filter. Toggling it on should mean "show me only prefile cards."
   const events = [];
   rows.forEach(r=>{
     if(r.prefile) events.push({type:"prefile", date:r.prefile, r});
-    events.push({type:"session", date:r.start, r});
+    if(!filters.prefile) events.push({type:"session", date:r.start, r});
   });
 
   // Group by calendar month+year (not just month — this data spans
@@ -657,7 +678,7 @@ function renderMonthView(rows){
     g.items.sort((a,b)=> new Date(a.date)-new Date(b.date) || a.r.n.localeCompare(b.r.n));
     const sec = document.createElement("div");
     sec.className = "month-section";
-    sec.innerHTML = `<div class="month-head"><h2>${MONTHS_LONG[g.month]} ${g.year} <span class="count">(${g.items.length})</span></h2></div>
+    sec.innerHTML = `<div class="month-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${MONTHS_LONG[g.month]} ${g.year} <span class="count">(${g.items.length})</span></h2></div>
       <div class="card-grid">${g.items.map(ev=> ev.type==="prefile" ? prefileCardHTML(ev.r) : sessionCardHTML(ev.r)).join("")}</div>`;
     el.appendChild(sec);
   });
@@ -680,10 +701,10 @@ function renderTableView(rows){
     <tr>
       <td class="state" data-label="State">${r.n}</td>
       <td data-label="In Session">${tableMeterHTML(r)}</td>
-      <td class="mono" data-label="Prefile">${fmt(r.prefile)}</td>
-      <td class="mono" data-label="Convene">${fmt(r.start)}</td>
-      <td class="mono" data-label="Crossover">${fmt(r.crossover)}</td>
-      <td class="mono" data-label="Adjourn">${fmt(r.end)}</td>
+      <td class="mono col-prefile" data-label="Prefile">${fmt(r.prefile)}</td>
+      <td class="mono col-session" data-label="Convene">${fmt(r.start)}</td>
+      <td class="mono col-crossover" data-label="Crossover">${fmt(r.crossover)}</td>
+      <td class="mono col-session" data-label="Adjourn">${fmt(r.end)}</td>
       <td data-label="Carries to '28"><span class="${r.carry27?'yes':'no'}">${r.carry27?'Yes':'No'}</span></td>
     </tr>
   `).join("");
