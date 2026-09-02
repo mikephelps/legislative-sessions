@@ -164,12 +164,12 @@
     position:sticky;
     top:0;
     z-index:5;
-    background:var(--ink-900);
+    background:var(--ink-950);
     display:flex;
     align-items:baseline;
     gap:12px;
-    padding:14px 16px 12px;
-    margin:0 -16px 16px;
+    padding:14px 0 10px;
+    margin-bottom:16px;
     border-bottom:1px solid var(--white-hairline);
   }
   .month-head h2{
@@ -195,7 +195,6 @@
 
   .state-card{
     background:#fff;
-    border:1px solid var(--slate-200);
     border-radius:var(--radius-2xl);
     padding:12px;
     box-shadow:var(--elev-1);
@@ -215,7 +214,7 @@
     letter-spacing:-0.01em;
     color:var(--slate-900);
   }
-  .badges{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+  .badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
   .badge{
     font-family:'JetBrains Mono',monospace;
     font-size:10px;
@@ -224,8 +223,66 @@
     padding:2px 7px;
     border-radius:var(--radius-sm);
     font-weight:500;
+    border:1px solid transparent;
+    line-height:1.4;
   }
-  .badge.carry{background:var(--violet-50);color:var(--violet-700);border:1px solid rgba(124,58,237,.25);}
+  .badge.carry{background:var(--violet-50);color:var(--violet-700);border-color:rgba(124,58,237,.25);}
+  /* Bold, filled "what kind of card is this" pills — inverted from the
+     lighter outlined style used for secondary attributes like "Carries
+     '28", so the card TYPE is the first thing that registers, from
+     across the room, before anyone reads a single date. Border stays
+     transparent (not "none") so the box height matches bordered badges
+     like .carry exactly — that mismatch was what caused the misalignment. */
+  .badge.prefile-badge{background:var(--amber-600);color:#fff;}
+  .badge.session-badge{background:var(--emerald-600);color:#fff;}
+
+  /* Prefile card: a heads-up event, not a session span — tinted amber so
+     it reads as a different kind of card at a glance, with no meter
+     (there's no reliable window to plot, just a single trigger date).
+     Uses flex + space-between so it stretches to match the session
+     card's height in the same grid row without looking stranded. */
+  .state-card--prefile{
+    background:var(--amber-50);
+    display:flex;
+    flex-direction:column;
+  }
+  .state-card--prefile .state-name{color:var(--amber-700);}
+  .prefile-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:6px 0;}
+  .prefile-date{
+    font-family:'JetBrains Mono',monospace;
+    font-weight:600;
+    font-size:20px;
+    color:var(--slate-900);
+    margin-bottom:4px;
+  }
+  .prefile-copy{
+    font-family:'Public Sans',sans-serif;
+    font-size:12.5px;
+    color:var(--slate-600);
+    line-height:1.4;
+  }
+  .state-card--prefile .days-caption{border-top-color:rgba(217,119,6,.2);}
+
+  .past-divider{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px;
+    text-transform:uppercase;
+    letter-spacing:.1em;
+    color:var(--white-muted);
+    text-align:center;
+    margin:8px 0 20px;
+    position:relative;
+  }
+  .past-divider::before, .past-divider::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    width:calc(50% - 40px);
+    height:1px;
+    background:var(--white-hairline);
+  }
+  .past-divider::before{left:0;}
+  .past-divider::after{right:0;}
 
   /* Prefile/crossover: hollow outlined tags above the meter, using the
      categorical-tag color system (not semantic status colors) — each
@@ -330,7 +387,6 @@
 
   @media (max-width:640px){
     .hero{padding:40px 16px 32px;}
-    .month-head{margin-left:-16px;margin-right:-16px;}
     thead{display:none;}
     table, tbody, tr, td{display:block;width:100%;}
     tbody tr{padding:10px 14px;border-bottom:1px solid var(--slate-100);}
@@ -352,9 +408,9 @@
 
 <div class="hero">
   <div class="hero-inner">
-    <div class="eyebrow">2027 Legislative Calendar</div>
-    <h1>When state legislatures<br>convene in 2027</h1>
-    <p>Prefiling, convene, crossover, and adjournment dates for all 50 states — browsable by month or by state, with live filtering.</p>
+    <div class="eyebrow">50-State Legislative Calendar</div>
+    <h1>Know when to start watching —<br>not just when session starts</h1>
+    <p>Some states let bills drop weeks before session even opens. This tracks both moments — prefiling and convene — across all 50 states, always sorted by what's coming up next.</p>
   </div>
 </div>
 
@@ -402,7 +458,6 @@
 </div>
 
 <script>
-const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 const data = [
 {n:"Alabama",start:"2027-02-02",end:"2027-05-13",prefile:"2026-12-01",carry26:false,carry27:false},
@@ -462,7 +517,6 @@ function fmt(d){
   const dt = new Date(d+"T00:00:00");
   return dt.toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'2-digit'});
 }
-function monthIndex(d){ return new Date(d+"T00:00:00").getMonth(); }
 
 let sortKey = "start", sortDir = 1, userSorted = false;
 let filters = {q:"", prefile:false, carry:false};
@@ -488,13 +542,11 @@ function daysStatHTML(r){
   return `<div class="days-caption"><b>${n} days</b> · 2027 session</div>`;
 }
 
-// Prefile/crossover appear exactly once each, as hollow outlined chips
-// above the meter — never duplicated as a top-right badge too.
+// Crossover is the only thing that still shows as a chip on the session
+// card — prefile now gets its own dedicated card (see renderMonthView).
 function chipRowHTML(r){
-  let html = "";
-  if(r.prefile) html += `<span class="tag prefile"><i class="cdot"></i>Prefile ${fmt(r.prefile)}</span>`;
-  if(r.crossover) html += `<span class="tag crossover"><i class="cdot"></i>XO ${fmt(r.crossover)}</span>`;
-  return html ? `<div class="chip-row">${html}</div>` : "";
+  if(!r.crossover) return "";
+  return `<div class="chip-row"><span class="tag crossover"><i class="cdot"></i>XO ${fmt(r.crossover)}</span></div>`;
 }
 
 // Year meter: a fixed Jan 1 – Dec 31 2027 track. Only the in-session
@@ -524,32 +576,91 @@ function tableMeterHTML(r){
 }
 
 function badgesHTML(r){
-  return r.carry27 ? `<span class="badge carry">Carries '28</span>` : "";
+  const carry = r.carry27 ? `<span class="badge carry">Carries '28</span>` : "";
+  return `<span class="badge session-badge">Session</span>${carry}`;
 }
+
+// Dedicated prefile card — a heads-up event, not a session span, so it
+// deliberately has no meter. Visually flagged with a tinted amber
+// treatment so it reads as a different *kind* of card at a glance, but
+// keeps the same top-row / body / caption rhythm as a session card so
+// the two don't feel like they're from different systems.
+function prefileCardHTML(r){
+  return `<div class="state-card state-card--prefile">
+    <div class="state-row-top">
+      <div class="state-name">${r.n}</div>
+      <span class="badge prefile-badge">Prefile</span>
+    </div>
+    <div class="prefile-body">
+      <div class="prefile-date">${fmt(r.prefile)}</div>
+      <div class="prefile-copy">Bills may begin appearing before session convenes.</div>
+    </div>
+    <div class="days-caption">Convenes <b>${fmt(r.start)}</b></div>
+  </div>`;
+}
+
+function sessionCardHTML(r){
+  return `<div class="state-card">
+    <div class="state-row-top">
+      <div class="state-name">${r.n}</div>
+      <div class="badges">${badgesHTML(r)}</div>
+    </div>
+    ${meterHTML(r)}
+    ${chipRowHTML(r)}
+    ${daysStatHTML(r)}
+  </div>`;
+}
+
+const MONTHS_LONG = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
 function renderMonthView(rows){
   const el = document.getElementById("month-view");
   el.innerHTML = "";
-  for(let m=0;m<12;m++){
-    const inMonth = rows.filter(r=>monthIndex(r.start)===m);
-    if(!inMonth.length) continue;
-    inMonth.sort((a,b)=> new Date(a.start)-new Date(b.start));
+
+  // Build one event per actionable moment — a state contributes a
+  // "prefile" event (if it has one) AND a "session" event, since those
+  // are two separate things to pay attention to, potentially months apart.
+  const events = [];
+  rows.forEach(r=>{
+    if(r.prefile) events.push({type:"prefile", date:r.prefile, r});
+    events.push({type:"session", date:r.start, r});
+  });
+
+  // Group by calendar month+year (not just month — this data spans
+  // 2026 through 2028, so "January" alone is ambiguous).
+  const groups = new Map();
+  events.forEach(ev=>{
+    const d = new Date(ev.date+"T00:00:00");
+    const key = d.getFullYear()*12 + d.getMonth();
+    if(!groups.has(key)) groups.set(key, {year:d.getFullYear(), month:d.getMonth(), items:[]});
+    groups.get(key).items.push(ev);
+  });
+
+  // Sort "now" to the top: current month forward chronologically, with
+  // anything already in the past pushed to the bottom instead of
+  // sorting first just because it's numerically earlier.
+  const now = new Date();
+  const nowKey = now.getFullYear()*12 + now.getMonth();
+  const keys = [...groups.keys()];
+  const upcoming = keys.filter(k=>k>=nowKey).sort((a,b)=>a-b);
+  const past = keys.filter(k=>k<nowKey).sort((a,b)=>a-b);
+  const ordered = [...upcoming, ...past];
+
+  ordered.forEach((key,idx)=>{
+    if(idx===upcoming.length && past.length){
+      const div = document.createElement("div");
+      div.className = "past-divider";
+      div.textContent = "Past";
+      el.appendChild(div);
+    }
+    const g = groups.get(key);
+    g.items.sort((a,b)=> new Date(a.date)-new Date(b.date) || a.r.n.localeCompare(b.r.n));
     const sec = document.createElement("div");
     sec.className = "month-section";
-    sec.innerHTML = `<div class="month-head"><h2>${MONTHS[m]} <span class="count">(${inMonth.length})</span></h2></div>
-      <div class="card-grid">${inMonth.map(r=>`
-        <div class="state-card">
-          <div class="state-row-top">
-            <div class="state-name">${r.n}</div>
-            <div class="badges">${badgesHTML(r)}</div>
-          </div>
-          ${meterHTML(r)}
-          ${chipRowHTML(r)}
-          ${daysStatHTML(r)}
-        </div>
-      `).join("")}</div>`;
+    sec.innerHTML = `<div class="month-head"><h2>${MONTHS_LONG[g.month]} ${g.year} <span class="count">(${g.items.length})</span></h2></div>
+      <div class="card-grid">${g.items.map(ev=> ev.type==="prefile" ? prefileCardHTML(ev.r) : sessionCardHTML(ev.r)).join("")}</div>`;
     el.appendChild(sec);
-  }
+  });
 }
 
 function renderTableView(rows){
