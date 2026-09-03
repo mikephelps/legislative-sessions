@@ -117,7 +117,7 @@
     background:var(--raspberry-500);
     color:#fff;
   }
-  .search-wrap{position:relative;flex:1;min-width:200px;}
+  .search-wrap{position:relative;flex:1 1 180px;max-width:260px;min-width:140px;}
   .search-wrap input{
     width:100%;
     padding:9px 14px 9px 34px;
@@ -224,15 +224,17 @@
   }
   .badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
   .badge{
+    display:inline-flex;
+    align-items:center;
     font-family:'JetBrains Mono',monospace;
     font-size:10px;
+    line-height:1;
     text-transform:uppercase;
     letter-spacing:.04em;
-    padding:2px 7px;
+    padding:4px 7px 3px;
     border-radius:var(--radius-sm);
     font-weight:500;
     border:1px solid transparent;
-    line-height:1.4;
   }
   .badge.carry{background:var(--violet-50);color:var(--violet-700);border-color:rgba(124,58,237,.25);}
   /* Bold, filled "what kind of card is this" pills — inverted from the
@@ -271,6 +273,24 @@
   }
   .state-card--prefile .days-caption{border-top-color:rgba(217,119,6,.2);}
 
+  /* Special session card: deliberately louder than everything else on
+     the page — dark, gradient glow in brand colors, raspberry badge —
+     since these are rare, out-of-cycle events that should interrupt the
+     normal scan pattern rather than blend into the regular rhythm of
+     white session cards and tinted amber prefile cards. */
+  .state-card--special{
+    background:#fff;
+    display:flex;
+    flex-direction:column;
+    box-shadow:var(--elev-1), 0 0 0 1px rgba(230,0,88,.18);
+  }
+  .state-card--special:hover{
+    box-shadow:var(--elev-2), 0 0 0 1px rgba(230,0,88,.25);
+  }
+  .state-card--special .state-name{color:var(--raspberry-500);}
+  .state-card--special .days-caption{border-top-color:rgba(230,0,88,.15);}
+  .badge.special-badge{background:var(--raspberry-500);color:#fff;}
+
   .past-divider{
     font-family:'JetBrains Mono',monospace;
     font-size:11px;
@@ -308,8 +328,9 @@
     gap:5px;
     font-family:'JetBrains Mono',monospace;
     font-size:10px;
+    line-height:1;
     font-weight:500;
-    padding:3px 9px;
+    padding:4px 9px 3px;
     border-radius:var(--radius-full);
     background:transparent;
     white-space:nowrap;
@@ -442,6 +463,7 @@
     </div>
     <button class="chip" id="chip-prefile">Has prefiling</button>
     <button class="chip" id="chip-carry">Carries over to '28</button>
+    <button class="chip" id="chip-special">Special sessions</button>
   </div>
 
   <div class="result-count" id="result-count"></div>
@@ -527,6 +549,15 @@ const data = [
 {n:"Wyoming",start:"2027-01-12",end:"2027-03-08",crossover:"2027-02-10",prefile:"2026-05-26",carry26:false,carry27:false}
 ];
 
+// PLACEHOLDER DATA — not real special session dates. We have no actual
+// source for these yet; this is here purely to demonstrate the card
+// concept. Swap for real data (or a live feed) before shipping.
+const specialSessions = [
+  {n:"Texas", date:"2026-10-15", reason:"Redistricting"},
+  {n:"California", date:"2026-11-06", reason:"Wildfire relief funding"},
+  {n:"Ohio", date:"2027-02-22", reason:"Budget shortfall"}
+];
+
 function fmt(d){
   if(!d) return "—";
   const dt = new Date(d+"T00:00:00");
@@ -534,7 +565,7 @@ function fmt(d){
 }
 
 let sortKey = "start", sortDir = 1, userSorted = false;
-let filters = {q:"", prefile:false, carry:false};
+let filters = {q:"", prefile:false, carry:false, special:false};
 
 function applyFilters(rows){
   return rows.filter(r=>{
@@ -614,6 +645,26 @@ function prefileCardHTML(r){
   </div>`;
 }
 
+// Special session card — deliberately louder than everything else on the
+// page (dark, gradient glow, raspberry badge) since these are rare,
+// out-of-cycle events that should visually interrupt the normal scan
+// pattern rather than blend into the regular calendar rhythm.
+function specialCardHTML(entry){
+  const row = data.find(d=>d.n===entry.n);
+  const regularNote = row ? `Regular session <b>${fmt(row.start)}</b>` : "";
+  return `<div class="state-card state-card--special">
+    <div class="state-row-top">
+      <div class="state-name">${entry.n}</div>
+      <span class="badge special-badge">Special session</span>
+    </div>
+    <div class="prefile-body">
+      <div class="prefile-date">${fmt(entry.date)}</div>
+      <div class="prefile-copy">${entry.reason}</div>
+    </div>
+    ${regularNote ? `<div class="days-caption">${regularNote}</div>` : ""}
+  </div>`;
+}
+
 function sessionCardHTML(r){
   return `<div class="state-card">
     <div class="state-row-top">
@@ -632,20 +683,45 @@ function renderMonthView(rows){
   const el = document.getElementById("month-view");
   el.innerHTML = "";
 
-  // Build one event per actionable moment — a state contributes a
-  // "prefile" event (if it has one) AND a "session" event, since those
-  // are two separate things to pay attention to, potentially months apart.
+  // Build one event per actionable moment. A state can contribute a
+  // "prefile" event, a "session" event, and any number of "special"
+  // session events — these are separate things to pay attention to,
+  // potentially months apart, so each gets its own card.
   //
-  // "Has prefiling" is an event-type filter here, not a state filter: with
-  // two card types on the page now, filtering states down while still
-  // showing their (visually identical, generic) session cards made the
-  // toggle look broken — nothing on screen explained why a card survived
-  // the filter. Toggling it on should mean "show me only prefile cards."
+  // Each toggle chip is an event-TYPE filter, not a state filter: with
+  // multiple card types on the page now, narrowing which states show up
+  // while still displaying their other (unrelated) card types made the
+  // toggles look broken. So: if any type-filter is active, show ONLY the
+  // selected type(s) — session cards are excluded whenever a filter is
+  // on, since "show me X" should mean just X, not "X plus the everyday
+  // stuff too." With nothing toggled, show everything (prefile, session,
+  // and special sessions all mixed in) — consistent with how "Has
+  // prefiling" already behaves: cards show by default, the filter just
+  // isolates them.
+  const wantedTypes = [];
+  if(filters.prefile) wantedTypes.push("prefile");
+  // "Carries to '28" badge only ever appears on session cards, so this
+  // filter should isolate to session cards specifically — not just
+  // narrow which states qualify while still showing their unrelated
+  // prefile/special cards too.
+  if(filters.carry) wantedTypes.push("session");
+  if(filters.special) wantedTypes.push("special");
+  const activeTypes = wantedTypes.length ? wantedTypes : ["prefile","session","special"];
+
   const events = [];
   rows.forEach(r=>{
-    if(r.prefile) events.push({type:"prefile", date:r.prefile, r});
-    if(!filters.prefile) events.push({type:"session", date:r.start, r});
+    if(activeTypes.includes("prefile") && r.prefile) events.push({type:"prefile", date:r.prefile, r});
+    if(activeTypes.includes("session")) events.push({type:"session", date:r.start, r});
   });
+  if(activeTypes.includes("special")){
+    // Filter against the same `rows` set every other card type uses —
+    // that already has search AND "Carries to '28" applied. Special
+    // sessions were only checking the search box on their own before,
+    // which is why toggling "Carries to '28" had no effect on them.
+    specialSessions
+      .filter(sp => rows.some(r => r.n === sp.n))
+      .forEach(sp => events.push({type:"special", date:sp.date, r:sp}));
+  }
 
   // Group by calendar month+year (not just month — this data spans
   // 2026 through 2028, so "January" alone is ambiguous).
@@ -679,7 +755,7 @@ function renderMonthView(rows){
     const sec = document.createElement("div");
     sec.className = "month-section";
     sec.innerHTML = `<div class="month-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${MONTHS_LONG[g.month]} ${g.year} <span class="count">(${g.items.length})</span></h2></div>
-      <div class="card-grid">${g.items.map(ev=> ev.type==="prefile" ? prefileCardHTML(ev.r) : sessionCardHTML(ev.r)).join("")}</div>`;
+      <div class="card-grid">${g.items.map(ev=> ev.type==="prefile" ? prefileCardHTML(ev.r) : ev.type==="special" ? specialCardHTML(ev.r) : sessionCardHTML(ev.r)).join("")}</div>`;
     el.appendChild(sec);
   });
 }
@@ -744,6 +820,11 @@ document.getElementById("chip-prefile").onclick = function(){
 document.getElementById("chip-carry").onclick = function(){
   filters.carry = !filters.carry;
   this.classList.toggle("active", filters.carry);
+  render();
+};
+document.getElementById("chip-special").onclick = function(){
+  filters.special = !filters.special;
+  this.classList.toggle("active", filters.special);
   render();
 };
 document.querySelectorAll("thead th").forEach(th=>{
