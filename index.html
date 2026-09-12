@@ -37,7 +37,9 @@
     --amber-50:#FFFBE8; --amber-600:#D97706; --amber-700:#B45309;
     --sky-50:#F0F9FF; --sky-600:#0284C7; --sky-700:#0369A1;
     --violet-50:#F5F3FF; --violet-600:#7C3AED; --violet-700:#6D28D9;
-    --emerald-600:#059669; --emerald-700:#047857;
+    --teal-600:#0D9488; --teal-700:#0F766E;
+    --indigo-50:#EEF2FF; --indigo-600:#4F46E5; --indigo-700:#4338CA;
+    --emerald-50:#ECFDF5; --emerald-100:#D1FAE5; --emerald-600:#059669; --emerald-700:#047857;
     /* Radius scale */
     --radius-sm:4px; --radius-md:6px; --radius-lg:8px;
     --radius-xl:10px; --radius-2xl:14px; --radius-full:9999px;
@@ -106,12 +108,16 @@
     background:transparent;
     padding:8px 18px;
     font-family:'Public Sans',sans-serif;
-    font-size:14px;
-    font-weight:700;
+    font-size:13px;
+    font-weight:600;
     color:var(--white-muted);
     border-radius:var(--radius-full);
     cursor:pointer;
     transition:all .15s ease;
+  }
+  .view-toggle button:hover:not(.active){
+    color:#fff;
+    background:rgba(255,255,255,.08);
   }
   .view-toggle button.active{
     background:var(--raspberry-500);
@@ -133,18 +139,70 @@
     position:absolute;left:12px;top:50%;transform:translateY(-50%);
     width:14px;height:14px;stroke:var(--slate-500);
   }
+  /* Filters are grouped in their own visually distinct container —
+     separate from the view toggle (which switches page mode, not what's
+     shown) so the two don't blend together and read as one confusing
+     control cluster. */
+  .control-divider{
+    border:none;
+    border-top:1px solid var(--white-hairline);
+    margin:16px 0;
+  }
+  .empty-state{
+    text-align:center;
+    padding:64px 20px;
+  }
+  .empty-state svg{
+    width:36px;height:36px;
+    color:var(--white-muted);
+    opacity:.5;
+    margin-bottom:16px;
+  }
+  .empty-title{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:17px;
+    color:#fff;
+    margin-bottom:6px;
+  }
+  .empty-sub{
+    font-family:'Public Sans',sans-serif;
+    font-size:13.5px;
+    color:var(--white-muted);
+  }
+  .filter-row{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+    margin-bottom:14px;
+  }
+  .filter-label{
+    font-family:'Public Sans',sans-serif;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:.06em;
+    color:var(--white-muted);
+    margin-right:4px;
+  }
   .chip{
     border:1px solid var(--white-hairline);
     background:var(--white-faint);
-    padding:8px 14px;
-    border-radius:var(--radius-full);
+    padding:5px 10px;
+    border-radius:var(--radius-sm);
     font-family:'Public Sans',sans-serif;
-    font-size:13px;
+    font-size:12px;
     font-weight:600;
     color:var(--white-muted);
     cursor:pointer;
     white-space:nowrap;
     transition:all .15s ease;
+  }
+  .chip:hover:not(.active){
+    color:#fff;
+    background:rgba(255,255,255,.1);
+    border-color:rgba(255,255,255,.3);
   }
   .chip.active{
     background:var(--ultra-600);
@@ -167,11 +225,22 @@
     background:var(--ink-950);
     display:flex;
     align-items:baseline;
+    justify-content:space-between;
+    flex-wrap:wrap;
     gap:12px;
     padding:14px 0 10px;
     margin-bottom:16px;
     border-bottom:1px solid var(--white-hairline);
   }
+  .abbr-legend{
+    display:flex;
+    gap:16px;
+    flex-wrap:wrap;
+    font-family:'JetBrains Mono',monospace;
+    font-size:10.5px;
+    color:var(--white-muted);
+  }
+  .abbr-legend b{color:#fff;margin-right:4px;}
   .month-head h2{
     font-family:'Plus Jakarta Sans',sans-serif;
     font-weight:700;
@@ -207,6 +276,9 @@
     padding:12px;
     box-shadow:var(--elev-1);
     transition:box-shadow .18s ease, transform .18s ease;
+    display:flex;
+    flex-direction:column;
+    min-height:150px;
   }
   .state-card:hover{box-shadow:var(--elev-2);transform:translateY(-1px);}
   .state-row-top{
@@ -243,21 +315,28 @@
      across the room, before anyone reads a single date. Border stays
      transparent (not "none") so the box height matches bordered badges
      like .carry exactly — that mismatch was what caused the misalignment. */
-  .badge.prefile-badge{background:var(--amber-600);color:#fff;}
-  .badge.session-badge{background:var(--emerald-600);color:#fff;}
+  .badge.prefile-badge{background:var(--indigo-600);color:#fff;}
+  /* Session badge is quiet (tinted, not solid) until the session is
+     actually happening — green only means "go" once it's true. Solid
+     fill + "Session Active" label kick in exactly when today falls
+     inside the session window, computed in badgesHTML(). */
+  .badge.session-badge{background:var(--emerald-100);color:var(--emerald-700);border-color:rgba(5,150,105,.3);}
+  .badge.session-badge.active{background:var(--emerald-600);color:#fff;border-color:transparent;}
 
-  /* Prefile card: a heads-up event, not a session span — tinted amber so
-     it reads as a different kind of card at a glance, with no meter
+  /* Prefile card: a heads-up event, not a session span — tinted indigo
+     so it reads as a different kind of card at a glance, with no meter
      (there's no reliable window to plot, just a single trigger date).
+     Indigo (not amber) specifically so it doesn't collide with amber's
+     new job elsewhere on the page: urgency/"act now, running out."
+     Prefile is a heads-up, not a deadline-pressure signal — different
+     enough in tone that they shouldn't share a color.
      Uses flex + space-between so it stretches to match the session
      card's height in the same grid row without looking stranded. */
   .state-card--prefile{
-    background:var(--amber-50);
-    display:flex;
-    flex-direction:column;
+    background:var(--indigo-50);
   }
-  .state-card--prefile .state-name{color:var(--amber-700);}
-  .prefile-body{flex:1;display:flex;flex-direction:column;justify-content:center;padding:6px 0;}
+  .state-card--prefile .state-name{color:var(--indigo-700);}
+  .prefile-body{flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding-top:4px;}
   .prefile-date{
     font-family:'JetBrains Mono',monospace;
     font-weight:600;
@@ -271,17 +350,15 @@
     color:var(--slate-600);
     line-height:1.4;
   }
-  .state-card--prefile .days-caption{border-top-color:rgba(217,119,6,.2);}
+  .state-card--prefile .days-caption{border-top-color:rgba(79,70,229,.2);}
 
   /* Special session card: deliberately louder than everything else on
      the page — dark, gradient glow in brand colors, raspberry badge —
      since these are rare, out-of-cycle events that should interrupt the
      normal scan pattern rather than blend into the regular rhythm of
-     white session cards and tinted amber prefile cards. */
+     white session cards and tinted indigo prefile cards. */
   .state-card--special{
     background:#fff;
-    display:flex;
-    flex-direction:column;
     box-shadow:var(--elev-1), 0 0 0 1px rgba(230,0,88,.18);
   }
   .state-card--special:hover{
@@ -321,6 +398,7 @@
     flex-wrap:wrap;
     gap:6px;
     margin:8px 0 0;
+    min-height:22px;
   }
   .tag{
     display:inline-flex;
@@ -335,8 +413,8 @@
     background:transparent;
     white-space:nowrap;
   }
-  .tag.prefile{color:var(--amber-700);border:1px solid var(--amber-600);}
   .tag.crossover{color:var(--sky-700);border:1px solid var(--sky-600);}
+  .tag.bid{color:var(--teal-700);border:1px solid var(--teal-600);}
   .tag .cdot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;}
 
   /* year meter: a fixed Jan–Dec 2027 track. Only the portion the
@@ -369,7 +447,7 @@
      own top border + spacing, so it reads as a distinct secondary stat
      instead of crowding the meter. */
   .days-caption{
-    margin-top:10px;
+    margin-top:auto;
     padding-top:8px;
     border-top:1px solid var(--slate-100);
     font-family:'JetBrains Mono',monospace;
@@ -377,6 +455,8 @@
     color:var(--slate-500);
   }
   .days-caption b{color:var(--slate-700);font-weight:600;}
+  .days-caption b.status-soon{color:var(--emerald-700);}
+  .days-caption b.status-urgent{color:var(--amber-700);}
 
   /* TABLE VIEW */
   .table-wrap{overflow-x:auto;border:1px solid var(--slate-200);border-radius:var(--radius-lg);background:#fff;}
@@ -392,9 +472,19 @@
     border-bottom:1px solid var(--slate-100);
     cursor:pointer;
     user-select:none;
+    white-space:nowrap;
   }
   thead th:hover{color:var(--ultra-600);}
   thead th.sorted{color:var(--ultra-600);}
+  .sort-icon{
+    display:inline-block;
+    width:11px;height:11px;
+    margin-left:4px;
+    vertical-align:-2px;
+    color:var(--slate-400);
+    opacity:.7;
+  }
+  thead th:hover .sort-icon, thead th.sorted .sort-icon{color:var(--ultra-600);opacity:1;}
   tbody tr{border-bottom:1px solid var(--slate-100);}
   tbody tr:hover{background:var(--slate-50);}
   tbody tr:last-child{border-bottom:none;}
@@ -402,9 +492,9 @@
   td.mono{font-family:'JetBrains Mono',monospace;color:var(--slate-500);}
   /* Ties the table back to the card view's color language, so switching
      between By Month and By State doesn't feel like two different apps:
-     amber = prefile, sky = crossover, emerald = session (matches the
+     indigo = prefile, sky = crossover, emerald = session (matches the
      meter fill and the Session/Prefile badges on the cards). */
-  td.mono.col-prefile{color:var(--amber-700);font-weight:500;}
+  td.mono.col-prefile{color:var(--indigo-700);font-weight:500;}
   td.mono.col-crossover{color:var(--sky-700);font-weight:500;}
   td.mono.col-session{color:var(--emerald-700);font-weight:500;}
   .yes{color:var(--slate-700);font-weight:600;}
@@ -445,8 +535,8 @@
 <div class="hero">
   <div class="hero-inner">
     <div class="eyebrow">50-State Legislative Calendar</div>
-    <h1>Know when to start watching —<br>not just when session starts</h1>
-    <p>Some states let bills drop weeks before session even opens. This tracks both moments — prefiling and convene — across all 50 states, always sorted by what's coming up next.</p>
+    <h1>Know when to start watching.<br>Not just when the session starts.</h1>
+    <p>Some states let bills drop weeks before session even opens. This tracks both moments, prefiling and convene, across all 50 states, always sorted by what's coming up next.</p>
   </div>
 </div>
 
@@ -461,10 +551,28 @@
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
       <input id="search" type="text" placeholder="Search state…">
     </div>
+  </div>
+
+  <hr class="control-divider">
+
+  <div class="filter-row">
+    <span class="filter-label">Filters</span>
     <button class="chip" id="chip-prefile">Has prefiling</button>
     <button class="chip" id="chip-carry">Carries over to '28</button>
     <button class="chip" id="chip-special">Special sessions</button>
   </div>
+
+  <div id="status-controls">
+    <hr class="control-divider">
+    <div class="filter-row">
+      <span class="filter-label">Status</span>
+      <button class="chip status-chip" data-status="inSession">Currently in session</button>
+      <button class="chip status-chip" data-status="startingSoon">Starting in 30 days</button>
+      <button class="chip status-chip" data-status="endingSoon">Ending in 30 days</button>
+    </div>
+  </div>
+
+  <hr class="control-divider">
 
   <div class="result-count" id="result-count"></div>
 
@@ -474,22 +582,18 @@
       <table>
         <thead>
           <tr>
-            <th data-sort="name">State</th>
-            <th>In Session</th>
-            <th data-sort="prefile">Prefile</th>
-            <th data-sort="start">Convene</th>
-            <th data-sort="crossover">Crossover</th>
-            <th data-sort="end">Adjourn</th>
-            <th data-sort="carry27">Carries to '28</th>
+            <th data-sort="name">State<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
+            <th data-sort="start">In Session<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
+            <th data-sort="prefile">Prefile<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
+            <th data-sort="start">Convene<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
+            <th data-sort="end">Adjourn<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
+            <th data-sort="crossover">Crossover<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
+            <th data-sort="carry27">Carries to '28<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
           </tr>
         </thead>
         <tbody id="table-body"></tbody>
       </table>
     </div>
-  </div>
-
-  <div class="note">
-    Prototype note — convene/adjourn dates are taken directly from the source PDF for all 50 states. Intro-deadline and crossover fields were only reliably extractable for states where the source table listed them explicitly; the remaining fields (prefile, carryover) should be spot-checked against the original before this goes live. This file is a functional pattern demo, not final Framer markup.
   </div>
 
 </div>
@@ -501,21 +605,21 @@ const data = [
 {n:"Alaska",start:"2027-01-19",end:"2027-05-19",prefile:"2027-01-08",carry26:false,carry27:true},
 {n:"Arizona",start:"2027-04-11",end:"2027-05-21",prefile:"2026-11-15",carry26:false,carry27:false},
 {n:"Arkansas",start:"2027-01-11",end:"2027-04-28",prefile:"2026-11-15",carry26:false,carry27:false},
-{n:"California",start:"2026-12-07",end:"2027-09-10",crossover:"2027-06-04",carry26:false,carry27:true},
-{n:"Colorado",start:"2027-01-11",end:"2027-05-10",prefile:"2026-12-01",carry26:false,carry27:false},
+{n:"California",start:"2026-06-01",end:"2026-10-02",crossover:"2027-06-04",bid:"2027-02-15",carry26:false,carry27:true},
+{n:"Colorado",start:"2027-01-11",end:"2027-05-10",prefile:"2026-12-01",bid:"2027-02-01",carry26:false,carry27:false},
 {n:"Connecticut",start:"2027-01-06",end:"2027-06-09",carry26:false,carry27:false},
 {n:"Delaware",start:"2027-01-12",end:"2027-06-30",prefile:"2026-12-15",carry26:false,carry27:true},
 {n:"Florida",start:"2027-03-02",end:"2027-04-30",prefile:"2026-08-01",carry26:false,carry27:false},
-{n:"Georgia",start:"2027-01-11",end:"2027-03-31",prefile:"2026-11-15",carry26:false,carry27:true},
+{n:"Georgia",start:"2027-01-11",end:"2027-03-31",prefile:"2026-11-15",bid:"2027-02-01",carry26:false,carry27:true},
 {n:"Hawaii",start:"2027-01-20",end:"2027-05-07",prefile:"2027-01-13",carry26:false,carry27:true},
 {n:"Idaho",start:"2027-01-11",end:"2027-04-02",carry26:false,carry27:false},
 {n:"Illinois",start:"2027-01-13",end:"2027-05-31",prefile:"2026-12-03",carry26:false,carry27:true},
 {n:"Indiana",start:"2027-01-12",end:"2027-04-29",prefile:"2026-11-17",carry26:false,carry27:false},
-{n:"Iowa",start:"2027-01-11",end:"2027-04-30",crossover:"2027-03-19",prefile:"2026-12-01",carry26:false,carry27:true},
+{n:"Iowa",start:"2027-01-11",end:"2027-04-30",crossover:"2027-03-19",bid:"2027-02-05",prefile:"2026-12-01",carry26:false,carry27:true},
 {n:"Kansas",start:"2027-01-11",end:"2027-05-07",prefile:"2026-11-04",carry26:false,carry27:true},
 {n:"Kentucky",start:"2027-01-05",end:"2027-03-30",prefile:"2026-09-01",carry26:false,carry27:false},
 {n:"Louisiana",start:"2027-04-12",end:"2027-06-10",prefile:"2027-01-25",carry26:false,carry27:false},
-{n:"Maine",start:"2026-12-02",end:"2027-06-30",carry26:false,carry27:true},
+{n:"Maine",start:"2026-09-17",end:"2027-10-16",carry26:false,carry27:true},
 {n:"Maryland",start:"2027-01-13",end:"2027-04-12",prefile:"2026-11-20",carry26:false,carry27:false},
 {n:"Massachusetts",start:"2027-01-06",end:"2027-11-17",carry26:false,carry27:true},
 {n:"Michigan",start:"2027-01-13",end:"2027-12-31",carry26:false,carry27:true},
@@ -539,7 +643,7 @@ const data = [
 {n:"South Carolina",start:"2027-01-12",end:"2027-05-13",prefile:"2026-11-09",carry26:false,carry27:true},
 {n:"South Dakota",start:"2027-01-12",end:"2027-03-31",crossover:"2027-02-24",prefile:"2026-12-13",carry26:false,carry27:false},
 {n:"Tennessee",start:"2027-01-12",end:"2027-04-22",prefile:"2026-11-04",carry26:false,carry27:true},
-{n:"Texas",start:"2027-01-12",end:"2027-05-31",crossover:"2027-05-14",prefile:"2026-11-09",carry26:false,carry27:false},
+{n:"Texas",start:"2027-01-12",end:"2027-05-31",crossover:"2027-05-14",bid:"2027-02-28",prefile:"2026-11-09",carry26:false,carry27:false},
 {n:"Utah",start:"2027-01-19",end:"2027-03-05",crossover:"2027-03-02",prefile:"2026-05-06",carry26:false,carry27:false},
 {n:"Vermont",start:"2027-01-06",end:"2027-05-14",prefile:"2026-12-15",carry26:false,carry27:true},
 {n:"Virginia",start:"2027-01-13",end:"2027-02-27",prefile:"2026-07-20",carry26:true,carry27:false},
@@ -565,7 +669,7 @@ function fmt(d){
 }
 
 let sortKey = "start", sortDir = 1, userSorted = false;
-let filters = {q:"", prefile:false, carry:false, special:false};
+let filters = {q:"", prefile:false, carry:false, special:false, status:null};
 
 function applyFilters(rows){
   return rows.filter(r=>{
@@ -581,53 +685,133 @@ function daysBetween(a,b){
   return Math.round(ms/(1000*60*60*24));
 }
 
+// Status is computed against the real current date, so results will
+// naturally shift day to day even with nothing else changed — same as
+// the "now-forward" sort already does elsewhere on this page.
+//
+// Each status is checked independently rather than forcing a state into
+// one exclusive label: "ending soon" is a SUBSET of "in session" (a
+// session ending in 12 days is also, definitionally, currently in
+// session), so a state matching "ending soon" must still match a broad
+// "currently in session" filter too. The three options aren't mutually
+// exclusive at the data level — they're different lenses a person picks
+// one at a time, so single-select UI is still right even though the
+// underlying sets overlap.
+function matchesStatus(r, key){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(r.start+"T00:00:00");
+  const end = new Date(r.end+"T00:00:00");
+  const DAY = 86400000;
+  const inSession = today>=start && today<=end;
+  if(key==="inSession") return inSession;
+  if(key==="startingSoon") return today<start && Math.round((start-today)/DAY)<=30;
+  if(key==="endingSoon") return inSession && Math.round((end-today)/DAY)<=30;
+  return false;
+}
+
 // Separated from the dates visually with its own top border + spacing —
-// a secondary comparison stat, not competing with the actual dates.
+// this now carries the actual "where are we" information (total length +
+// elapsed/remaining), since the meter itself no longer references a
+// calendar year at all.
 function daysStatHTML(r){
   const n = daysBetween(r.start, r.end);
-  return `<div class="days-caption"><b>${n} days</b> · 2027 session</div>`;
+  return `<div class="days-caption"><b>${n}-day session</b> · ${sessionStatusText(r)}</div>`;
 }
 
 // Crossover is the only thing that still shows as a chip on the session
 // card — prefile now gets its own dedicated card (see renderMonthView).
+// Bill Introduction Deadline (BID) is optional — comes from a CMS field
+// that won't always be set. When it exists, it always renders to the
+// LEFT of Crossover (chronologically it happens first: bills must be
+// introduced before the chamber crossover deadline).
 function chipRowHTML(r){
-  if(!r.crossover) return "";
-  return `<div class="chip-row"><span class="tag crossover"><i class="cdot"></i>XO ${fmt(r.crossover)}</span></div>`;
+  let html = "";
+  if(r.bid) html += `<span class="tag bid"><i class="cdot"></i>BID ${fmt(r.bid)}</span>`;
+  if(r.crossover) html += `<span class="tag crossover"><i class="cdot"></i>XO ${fmt(r.crossover)}</span>`;
+  // Always render the container, even empty — reserving this space
+  // consistently keeps a plain session card's internal rhythm matching
+  // one that has tags, instead of the layout visibly collapsing wherever
+  // content happens to be missing.
+  return `<div class="chip-row">${html}</div>`;
 }
 
-// Year meter: a fixed Jan 1 – Dec 31 2027 track. Only the in-session
-// window gets filled (clamped to the visible year for sessions that
-// start before Jan or run past Dec), so a July–Dec session visibly
-// fills the back half of the bar instead of looking identical to
-// every other state's timeline.
-const YEAR_START = new Date("2027-01-01T00:00:00").getTime();
-const YEAR_END = new Date("2027-12-31T00:00:00").getTime();
-function yearPct(dateStr){
-  const t = new Date(dateStr+"T00:00:00").getTime();
-  return Math.max(0, Math.min(100, ((t-YEAR_START)/(YEAR_END-YEAR_START))*100));
+// The meter is now self-scaled to EACH SESSION'S OWN length — 0% is
+// always that state's own convene date, 100% is always its own adjourn
+// date. No calendar-year frame, no clamping, no clipping. This is the
+// fix for the multi-year confusion: a fixed Jan–Dec axis had no way to
+// represent California (starts Dec '26) or New Jersey (ends Jan '28)
+// without silently lying about where they actually fall. Self-scaling
+// means every state renders identically correctly regardless of how
+// long the session is or which calendar years it touches.
+//
+// The bar has exactly ONE meaning, in every state, in every view, always:
+// solid fill = elapsed proportion of the session as of today. Nothing
+// else. Before the session starts, that's 0% (empty). After it ends,
+// that's 100% (full). The specific "starts in Xd / Xd left / complete"
+// distinction lives in the text caption, not in the bar's color — so the
+// bar itself never has to change what it represents.
+function sessionElapsedPct(r){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(r.start+"T00:00:00");
+  const end = new Date(r.end+"T00:00:00");
+  if(today<=start) return 0;
+  if(today>=end) return 100;
+  return ((today-start)/(end-start))*100;
 }
+
+// Bold + green for "starts in X" (matches the green go-live signal),
+// bold + orange for "X left" (matches the amber urgency/act-now signal
+// used elsewhere — this is the one place that countdown pressure should
+// show up as color, not just words). "Complete" stays neutral: nothing
+// urgent left to flag once a session has ended.
+function sessionStatusText(r){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(r.start+"T00:00:00");
+  const end = new Date(r.end+"T00:00:00");
+  const DAY = 86400000;
+  if(today<start){
+    const d = Math.round((start-today)/DAY);
+    const label = d===0 ? "Starts today" : `Starts in ${d} day${d===1?'':'s'}`;
+    return `<b class="status-soon">${label}</b>`;
+  }
+  if(today>end) return "Complete";
+  const d = Math.round((end-today)/DAY);
+  const label = d<=0 ? "Last day" : `${d} day${d===1?'':'s'} left`;
+  return `<b class="status-urgent">${label}</b>`;
+}
+
 function meterHTML(r){
-  const s = yearPct(r.start), e = yearPct(r.end);
-  const w = Math.max(e - s, 1);
-  return `<div class="yearmeter"><div class="fill" style="left:${s}%;width:${w}%;"></div></div>
+  const pct = sessionElapsedPct(r);
+  return `<div class="yearmeter"><div class="fill" style="left:0%;width:${pct}%;"></div></div>
     <div class="meter-dates"><span>${fmt(r.start)}</span><span>${fmt(r.end)}</span></div>`;
 }
 
 // Compact bar-only variant for the table view — no date labels, since
-// Convene/Adjourn already have their own columns there.
+// Convene/Adjourn already have their own columns there. Uses the exact
+// same elapsed-percentage logic as the card meter: same element, same
+// meaning, everywhere on the page.
 function tableMeterHTML(r){
-  const s = yearPct(r.start), e = yearPct(r.end);
-  const w = Math.max(e - s, 1);
-  return `<div class="yearmeter table-meter"><div class="fill" style="left:${s}%;width:${w}%;"></div></div>`;
+  const pct = sessionElapsedPct(r);
+  return `<div class="yearmeter table-meter"><div class="fill" style="left:0%;width:${pct}%;"></div></div>`;
 }
 
+// The session badge itself is the "green = go" signal: quiet/tinted by
+// default, and only turns solid green with an explicit "Session Active"
+// label once today actually falls inside the convene→adjourn window.
 function badgesHTML(r){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(r.start+"T00:00:00");
+  const end = new Date(r.end+"T00:00:00");
+  const active = today>=start && today<=end;
+  const sessionBadge = active
+    ? `<span class="badge session-badge active">Session Active</span>`
+    : `<span class="badge session-badge">Session</span>`;
   const carry = r.carry27 ? `<span class="badge carry">Carries '28</span>` : "";
-  return `<span class="badge session-badge">Session</span>${carry}`;
+  return `${sessionBadge}${carry}`;
 }
 
 // Dedicated prefile card — a heads-up event, not a session span, so it
-// deliberately has no meter. Visually flagged with a tinted amber
+// deliberately has no meter. Visually flagged with a tinted indigo
 // treatment so it reads as a different *kind* of card at a glance, but
 // keeps the same top-row / body / caption rhythm as a session card so
 // the two don't feel like they're from different systems.
@@ -679,6 +863,19 @@ function sessionCardHTML(r){
 
 const MONTHS_LONG = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
+function emptyStateHTML(message, sub){
+  return `<div class="empty-state">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="3" y="5" width="18" height="15" rx="2"/>
+      <line x1="8" y1="2" x2="8" y2="7"/><line x1="16" y1="2" x2="16" y2="7"/>
+      <line x1="3" y1="10" x2="21" y2="10"/>
+      <line x1="9.5" y1="13.5" x2="14.5" y2="18.5"/><line x1="14.5" y1="13.5" x2="9.5" y2="18.5"/>
+    </svg>
+    <div class="empty-title">${message || "Nothing matches these filters"}</div>
+    <div class="empty-sub">${sub || "Try clearing a filter or adjusting your search."}</div>
+  </div>`;
+}
+
 function renderMonthView(rows){
   const el = document.getElementById("month-view");
   el.innerHTML = "";
@@ -706,12 +903,19 @@ function renderMonthView(rows){
   // prefile/special cards too.
   if(filters.carry) wantedTypes.push("session");
   if(filters.special) wantedTypes.push("special");
+  // The Status group (Currently in session / Starting soon / Ending soon)
+  // is also a session-only concept — a prefile or special-session date is
+  // a single trigger, not a span, so "in session" has nothing to check
+  // against for those types.
+  if(filters.status) wantedTypes.push("session");
   const activeTypes = wantedTypes.length ? wantedTypes : ["prefile","session","special"];
 
   const events = [];
   rows.forEach(r=>{
     if(activeTypes.includes("prefile") && r.prefile) events.push({type:"prefile", date:r.prefile, r});
-    if(activeTypes.includes("session")) events.push({type:"session", date:r.start, r});
+    if(activeTypes.includes("session") && (!filters.status || matchesStatus(r, filters.status))){
+      events.push({type:"session", date:r.start, r});
+    }
   });
   if(activeTypes.includes("special")){
     // Filter against the same `rows` set every other card type uses —
@@ -736,12 +940,42 @@ function renderMonthView(rows){
   // Sort "now" to the top: current month forward chronologically, with
   // anything already in the past pushed to the bottom instead of
   // sorting first just because it's numerically earlier.
-  const now = new Date();
-  const nowKey = now.getFullYear()*12 + now.getMonth();
+  // A month group is only truly "Past" if EVERYTHING in it has actually
+  // concluded — not just because the group's key (based on convene/
+  // trigger month) is behind the calendar. A session that started
+  // several months ago but hasn't adjourned yet is still active RIGHT
+  // NOW, and burying it under "Past" because of when it started would
+  // hide the exact thing this page exists to surface. So: check each
+  // event's own relevant end point — a session's actual adjourn date,
+  // or a prefile/special's single trigger date — not just its group's
+  // start-month bucket.
+  const today = new Date(); today.setHours(0,0,0,0);
+  const nowKey = today.getFullYear()*12 + today.getMonth();
+  function eventIsConcluded(ev){
+    const relevantEnd = ev.type==="session" ? ev.r.end : ev.date;
+    return new Date(relevantEnd+"T00:00:00") < today;
+  }
   const keys = [...groups.keys()];
-  const upcoming = keys.filter(k=>k>=nowKey).sort((a,b)=>a-b);
-  const past = keys.filter(k=>k<nowKey).sort((a,b)=>a-b);
+  // Sort by "effective" position: a group that started before this month
+  // but still has something unconcluded gets clamped to sort AT "now"
+  // (not at its true, earlier month) — otherwise an active-but-started-
+  // earlier session would float chronologically ahead of the current
+  // month, which reads just as confusingly as burying it under "Past"
+  // did. Ties (multiple such groups) fall back to true month order, so
+  // the one that's been running longest surfaces first.
+  const upcoming = keys
+    .filter(k => groups.get(k).items.some(ev => !eventIsConcluded(ev)))
+    .sort((a,b) => {
+      const ea = Math.max(a, nowKey), eb = Math.max(b, nowKey);
+      return ea!==eb ? ea-eb : a-b;
+    });
+  const past = keys.filter(k => groups.get(k).items.every(ev => eventIsConcluded(ev))).sort((a,b)=>a-b);
   const ordered = [...upcoming, ...past];
+
+  if(ordered.length === 0){
+    el.innerHTML = emptyStateHTML();
+    return;
+  }
 
   ordered.forEach((key,idx)=>{
     if(idx===upcoming.length && past.length){
@@ -754,7 +988,7 @@ function renderMonthView(rows){
     g.items.sort((a,b)=> new Date(a.date)-new Date(b.date) || a.r.n.localeCompare(b.r.n));
     const sec = document.createElement("div");
     sec.className = "month-section";
-    sec.innerHTML = `<div class="month-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${MONTHS_LONG[g.month]} ${g.year} <span class="count">(${g.items.length})</span></h2></div>
+    sec.innerHTML = `<div class="month-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${MONTHS_LONG[g.month]} ${g.year} <span class="count">(${g.items.length})</span></h2><div class="abbr-legend"><span><b>XO</b> = Crossover</span><span><b>BID</b> = Bill Introduction Deadline</span></div></div>
       <div class="card-grid">${g.items.map(ev=> ev.type==="prefile" ? prefileCardHTML(ev.r) : ev.type==="special" ? specialCardHTML(ev.r) : sessionCardHTML(ev.r)).join("")}</div>`;
     el.appendChild(sec);
   });
@@ -773,14 +1007,19 @@ function renderTableView(rows){
     return 0;
   });
   const tbody = document.getElementById("table-body");
+  if(sorted.length === 0){
+    tbody.innerHTML = `<tr><td colspan="7" style="padding:0;">${emptyStateHTML("No states match your search", "Try a different spelling or clear the search box.")}</td></tr>`;
+    document.querySelectorAll("thead th").forEach(th=> th.classList.remove("sorted"));
+    return;
+  }
   tbody.innerHTML = sorted.map(r=>`
     <tr>
       <td class="state" data-label="State">${r.n}</td>
       <td data-label="In Session">${tableMeterHTML(r)}</td>
       <td class="mono col-prefile" data-label="Prefile">${fmt(r.prefile)}</td>
       <td class="mono col-session" data-label="Convene">${fmt(r.start)}</td>
-      <td class="mono col-crossover" data-label="Crossover">${fmt(r.crossover)}</td>
       <td class="mono col-session" data-label="Adjourn">${fmt(r.end)}</td>
+      <td class="mono col-crossover" data-label="Crossover">${fmt(r.crossover)}</td>
       <td data-label="Carries to '28"><span class="${r.carry27?'yes':'no'}">${r.carry27?'Yes':'No'}</span></td>
     </tr>
   `).join("");
@@ -801,13 +1040,35 @@ document.getElementById("btn-month").onclick = ()=>{
   document.getElementById("btn-state").classList.remove("active");
   document.getElementById("month-view").style.display = "";
   document.getElementById("state-view").style.display = "none";
+  document.getElementById("status-controls").style.display = "";
 };
 document.getElementById("btn-state").onclick = ()=>{
   document.getElementById("btn-state").classList.add("active");
   document.getElementById("btn-month").classList.remove("active");
   document.getElementById("state-view").style.display = "";
   document.getElementById("month-view").style.display = "none";
+  // Status (in session / starting soon / ending soon) only has meaning
+  // for the card-based month view — By State stays the neutral,
+  // always-see-everything reference view per explicit request, so hide
+  // the control here rather than leave a visible toggle that does nothing.
+  document.getElementById("status-controls").style.display = "none";
 };
+// Status group is single-select: clicking an already-active chip clears
+// it, clicking a different one switches to it. Unlike the other filter
+// chips, these aren't independent yes/no facts — a session can't be
+// "currently in session" and "starting in 30 days" from the same click,
+// so radio-style behavior avoids the contradictory/empty-result problem
+// the other filters can otherwise fall into when combined carelessly.
+document.querySelectorAll(".status-chip").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    const key = btn.dataset.status;
+    filters.status = (filters.status === key) ? null : key;
+    document.querySelectorAll(".status-chip").forEach(b=>{
+      b.classList.toggle("active", b.dataset.status === filters.status);
+    });
+    render();
+  });
+});
 document.getElementById("search").addEventListener("input", e=>{
   filters.q = e.target.value.toLowerCase();
   render();
