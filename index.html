@@ -4,9 +4,12 @@
 <meta charset="UTF-8">
 <title>2027 Legislative Session Dates</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Public+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
+  @import url('https://api.fontshare.com/v2/css?f[]=satoshi@400,500,700,900&display=swap');
 
   :root{
+    --container-max:1440px;
+    --container-pad:24px;
     /* Ink (dark surfaces) */
     --ink-950:#05011F;
     --ink-900:#0A0438;
@@ -52,19 +55,18 @@
     margin:0;
     background:var(--ink-950);
     color:var(--slate-200);
-    font-family:'Public Sans',sans-serif;
+    font-family:'Satoshi',sans-serif;
     -webkit-font-smoothing:antialiased;
   }
-  .page{max-width:1080px;margin:0 auto;padding:0 20px 80px;}
+  .page{max-width:var(--container-max);margin:0 auto;padding:0 var(--container-pad) 80px;}
 
   /* HEADER */
   .hero{
-    padding:56px 20px 40px;
     margin-bottom:20px;
   }
-  .hero-inner{max-width:1080px;margin:0 auto;}
+  .hero-inner{max-width:var(--container-max);margin:0 auto;padding:56px var(--container-pad) 40px;}
   .eyebrow{
-    font-family:'JetBrains Mono',monospace;
+    font-family:'Satoshi',sans-serif;
     font-size:12px;
     letter-spacing:.15em;
     text-transform:uppercase;
@@ -107,9 +109,9 @@
     border:none;
     background:transparent;
     padding:8px 18px;
-    font-family:'Public Sans',sans-serif;
+    font-family:'Satoshi',sans-serif;
     font-size:13px;
-    font-weight:600;
+    font-weight:700;
     color:var(--white-muted);
     border-radius:var(--radius-full);
     cursor:pointer;
@@ -130,7 +132,7 @@
     border-radius:var(--radius-full);
     border:1px solid var(--slate-200);
     background:#fff;
-    font-family:'Public Sans',sans-serif;
+    font-family:'Satoshi',sans-serif;
     font-size:14px;
     color:var(--slate-900);
   }
@@ -143,6 +145,297 @@
      separate from the view toggle (which switches page mode, not what's
      shown) so the two don't blend together and read as one confusing
      control cluster. */
+  /* Stat summary: sits above the tab switcher (not inside either tab)
+     because "who's in session right now" is relevant no matter which
+     detailed view someone picks next — burying it inside one tab would
+     mean anyone landing on the other tab first never sees it. */
+  .section-title{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:24px;
+    color:#fff;
+    margin:0 0 16px;
+  }
+  .stat-summary{
+    max-width:1080px;
+    margin-bottom:28px;
+  }
+  .stat-card--unified{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:20px;
+  }
+  @media (max-width:720px){ .stat-card--unified{grid-template-columns:1fr;} }
+  /* No divider line anymore — everything here is already contained
+     inside its own box (see below), so a plain border between the two
+     columns was a redundant second separator doing nothing the boxes
+     don't already do. */
+  .stat-col-left{
+    position:relative;
+    display:flex;
+    flex-direction:column;
+    padding:14px;
+    border-radius:var(--radius-lg);
+    /* Genuinely transparent — no fill at all, just lets the parent
+       card's own dark background + dot pattern show straight through.
+       The gradient ring is a separate pseudo-element (below), not part
+       of this element's own background — that's what makes the middle
+       actually see-through instead of flooded with color. */
+    background:transparent;
+  }
+  .stat-col-left::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    border-radius:inherit;
+    padding:1px;
+    background:linear-gradient(135deg, var(--emerald-600), var(--ultra-600));
+    /* mask-composite "punches out" everything except a 1px ring — this
+       is what a flat/low-opacity double-background layering couldn't
+       actually do; that approach can only ever dim the fill, never make
+       it truly absent. */
+    -webkit-mask:linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite:xor;
+    mask-composite:exclude;
+    pointer-events:none;
+  }
+  @media (max-width:720px){ .stat-col-left{padding-bottom:16px;} }
+  .stat-col-right{display:flex;flex-direction:column;}
+  .stat-inline-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .stat-inline-head h4{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:16px;
+    line-height:1;
+    color:#fff;
+    margin:0;
+  }
+  .stat-inline-head .stat-count{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:400;
+    font-size:13px;
+    line-height:1;
+    color:var(--white-muted);
+  }
+  .stat-card{
+    background:var(--ink-900);
+    border:1px solid var(--white-hairline);
+    border-radius:var(--radius-xl);
+    padding:14px;
+  }
+  .stat-card-head{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:12px;
+  }
+  .stat-card-head h3{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:18px;
+    line-height:1;
+    color:#fff;
+    margin:0;
+  }
+  .stat-card-head .stat-count{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:400;
+    font-size:13px;
+    line-height:1;
+    color:var(--white-muted);
+  }
+  /* Each group is its own contained sub-card — a real boundary (border +
+     faint tint) instead of a line trying to imply separation. Solves the
+     "where does one section end and the next begin" problem directly,
+     rather than needing color-matched accents to hint at it. */
+  .stat-group{
+    margin-top:10px;
+    padding:14px;
+    border-radius:var(--radius-lg);
+    border:1px solid transparent;
+    /* Double-background trick: one flat fill for the inside (padding-box),
+       one gradient for the border itself (border-box) — lets the border
+       fade from the group's accent color into the card's own background
+       tone instead of being a single flat saturated color all the way
+       around, which read as too loud/pronounced. */
+    background:
+      linear-gradient(rgba(255,255,255,.03), rgba(255,255,255,.03)) padding-box,
+      linear-gradient(135deg, var(--group-color, var(--white-hairline)), var(--ink-900) 85%) border-box;
+  }
+  /* No top margin on the first sub-card — it needs to start flush with
+     the top of the column so it aligns with the "In Session" box's
+     border on the left, not sit 14px lower than it. */
+  .stat-group:first-child{margin-top:0;}
+  .stat-group-label{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:11px;
+    line-height:1;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:#fff;
+    margin-bottom:12px;
+  }
+  .stat-group-label .stat-count{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:400;
+    line-height:1;
+    text-transform:none;
+    letter-spacing:0;
+    color:var(--white-muted);
+  }
+  .stat-chips{display:flex;flex-wrap:wrap;gap:6px;}
+  .stat-empty{
+    font-family:'Satoshi',sans-serif;
+    font-size:12.5px;
+    color:var(--white-muted);
+    font-style:italic;
+  }
+  .stat-chip{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-width:34px;
+    height:28px;
+    padding:0 8px;
+    border-radius:var(--radius-md);
+    font-family:'JetBrains Mono',monospace;
+    font-weight:700;
+    font-size:11px;
+    letter-spacing:.02em;
+    cursor:pointer;
+    border:none;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .stat-chip:hover{transform:translateY(-1px);box-shadow:0 4px 10px rgba(0,0,0,.25);}
+  .stat-chip.chip-session{background:var(--emerald-600);color:#fff;}
+  .stat-chip.chip-special{background:var(--raspberry-500);color:#fff;}
+  .stat-chip.chip-soon{background:var(--emerald-100);color:var(--emerald-700);}
+  .stat-chip.chip-urgent{background:#FEF3E2;color:var(--amber-700);}
+
+  /* Hierarchy: "In Session" is the headline card (brighter border, faint
+     emerald-tinted dot pattern) — everything else is secondary context,
+     one shared card with three smaller labeled groups instead of
+     competing for the same visual weight. */
+  .stat-card{position:relative;overflow:hidden;}
+  .stat-card::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background-image:radial-gradient(circle, rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size:14px 14px;
+    pointer-events:none;
+  }
+  .stat-card-head, .stat-col-left, .stat-col-right, .stat-inline-head, .stat-group, .stat-chips, .stat-empty{position:relative;}
+  /* Year-at-a-glance density mini-chart — fills the left column with
+     something genuinely useful on days when the live "in session" count
+     is small, rather than leaving dead space or padding around a number
+     that's just naturally going to be low most days. */
+  .density-chart-wrap{margin-top:auto;padding-top:16px;}
+  .density-chart-title{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.05em;
+    color:var(--white-muted);
+    margin-bottom:8px;
+  }
+  .density-chart{
+    display:flex;
+    align-items:flex-end;
+    justify-content:flex-start;
+    gap:6px;
+    height:56px;
+  }
+  .density-bar{
+    flex:1;
+    max-width:32px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-end;
+    height:100%;
+  }
+  .density-bar-fill{
+    width:100%;
+    border-radius:2px 2px 0 0;
+    background:linear-gradient(180deg, #34D399 0%, var(--emerald-600) 100%);
+    min-height:2px;
+  }
+  .density-bar-label{
+    margin-top:4px;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:9px;
+    color:var(--white-muted);
+  }
+  .stat-icon{
+    display:inline-flex;
+    width:15px;height:15px;
+    flex:none;
+  }
+  .stat-icon svg{width:100%;height:100%;}
+  .stat-card-head .stat-icon{color:var(--emerald-600);}
+
+  /* Shared popover — one element, repositioned per chip on hover/tap,
+     rather than a hidden popover duplicated for every chip. */
+  .stat-popover{
+    display:none;
+    position:absolute;
+    z-index:20;
+    transform:translateX(-50%);
+    background:#fff;
+    border-radius:var(--radius-md);
+    box-shadow:var(--elev-2);
+    padding:10px 12px;
+    min-width:150px;
+    text-align:center;
+  }
+  .stat-popover-title{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    color:var(--slate-900);
+    margin-bottom:2px;
+  }
+  .stat-popover-info{
+    font-family:'Satoshi',sans-serif;
+    font-size:11.5px;
+    color:var(--slate-600);
+    margin-bottom:8px;
+  }
+  .stat-popover-jump{
+    width:100%;
+    border:none;
+    background:var(--ultra-600);
+    color:#fff;
+    font-family:'Satoshi',sans-serif;
+    font-weight:700;
+    font-size:11.5px;
+    padding:6px 10px;
+    border-radius:var(--radius-sm);
+    cursor:pointer;
+  }
+  .stat-popover-jump:hover{background:var(--ultra-700);}
+
+  /* Brief highlight when a stat chip jumps the page to a card, so the
+     eye actually lands on the right one instead of just "somewhere on
+     screen after a scroll." */
+  @keyframes jumpPulse{
+    0%{box-shadow:0 0 0 0 rgba(64,2,255,.5);}
+    100%{box-shadow:0 0 0 10px rgba(64,2,255,0);}
+  }
+  .jump-highlight{animation:jumpPulse 1s ease-out 2;}
+
   .control-divider{
     border:none;
     border-top:1px solid var(--white-hairline);
@@ -166,7 +459,7 @@
     margin-bottom:6px;
   }
   .empty-sub{
-    font-family:'Public Sans',sans-serif;
+    font-family:'Satoshi',sans-serif;
     font-size:13.5px;
     color:var(--white-muted);
   }
@@ -178,7 +471,7 @@
     margin-bottom:14px;
   }
   .filter-label{
-    font-family:'Public Sans',sans-serif;
+    font-family:'Satoshi',sans-serif;
     font-size:11px;
     font-weight:700;
     text-transform:uppercase;
@@ -191,9 +484,9 @@
     background:var(--white-faint);
     padding:5px 10px;
     border-radius:var(--radius-sm);
-    font-family:'Public Sans',sans-serif;
+    font-family:'Satoshi',sans-serif;
     font-size:12px;
-    font-weight:600;
+    font-weight:700;
     color:var(--white-muted);
     cursor:pointer;
     white-space:nowrap;
@@ -210,7 +503,7 @@
     color:#fff;
   }
   .result-count{
-    font-family:'JetBrains Mono',monospace;
+    font-family:'Satoshi',sans-serif;
     font-size:12px;
     color:var(--white-muted);
     margin-bottom:20px;
@@ -222,7 +515,15 @@
     position:sticky;
     top:0;
     z-index:5;
+    /* Flat fill matching the page background exactly (not a gradient) —
+       the header is width-constrained to the content column, not full-
+       bleed, so a gradient that shifts color creates a visible boxed
+       rectangle with hard left/right edges. A flat fill in the SAME
+       color as the page has no edges to see at all. Soft shadow instead
+       of a hard border-bottom still stands — it fades out gradually
+       rather than doubling up with the date-divider's own line below.*/
     background:var(--ink-950);
+    box-shadow:0 8px 12px -8px rgba(0,0,0,.5);
     display:flex;
     align-items:baseline;
     justify-content:space-between;
@@ -230,21 +531,20 @@
     gap:12px;
     padding:14px 0 10px;
     margin-bottom:16px;
-    border-bottom:1px solid var(--white-hairline);
   }
   .abbr-legend{
     display:flex;
     gap:16px;
     flex-wrap:wrap;
-    font-family:'JetBrains Mono',monospace;
+    font-family:'Satoshi',sans-serif;
     font-size:10.5px;
     color:var(--white-muted);
   }
-  .abbr-legend b{color:#fff;margin-right:4px;}
+  .abbr-legend b{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:#fff;margin-right:4px;}
   .month-head h2{
     font-family:'Plus Jakarta Sans',sans-serif;
     font-weight:700;
-    font-size:24px;
+    font-size:20px;
     letter-spacing:-0.02em;
     margin:0;
     color:#fff;
@@ -258,7 +558,7 @@
     stroke:var(--white-muted);
   }
   .month-head h2 .count{
-    font-family:'JetBrains Mono',monospace;
+    font-family:'Satoshi',sans-serif;
     font-size:15px;
     font-weight:400;
     color:var(--white-muted);
@@ -268,6 +568,48 @@
     display:grid;
     grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
     gap:16px;
+  }
+  .date-divider{
+    grid-column:1 / -1;
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:12px;
+    color:var(--white-muted);
+    margin:2px 0;
+  }
+  .date-divider::after{
+    content:"";
+    flex:1;
+    height:1px;
+    background:var(--white-hairline);
+  }
+  .date-divider:first-child{margin-top:0;}
+  /* Live "where am I" readout — bottom, not the left margin (a tall
+     narrow left strip forces either rotated text or type too small to
+     read). Complements the static inline dividers rather than
+     duplicating them: dividers answer "what date is this row",
+     this answers "what date am I generally at right now" while
+     scrolling fast. */
+  .scroll-date-pill{
+    position:fixed;
+    left:50%;
+    bottom:20px;
+    transform:translateX(-50%);
+    background:var(--ink-900);
+    border:1px solid var(--white-hairline);
+    color:#fff;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    padding:8px 16px;
+    border-radius:var(--radius-full);
+    box-shadow:0 8px 24px rgba(0,0,0,.35);
+    z-index:50;
+    pointer-events:none;
+    opacity:.95;
   }
 
   .state-card{
@@ -288,27 +630,63 @@
     margin-bottom:8px;
   }
   .state-name{
+    display:flex;
+    align-items:center;
+    gap:6px;
     font-family:'Plus Jakarta Sans',sans-serif;
     font-weight:700;
     font-size:17px;
     letter-spacing:-0.01em;
     color:var(--slate-900);
   }
+  /* Small, muted state code — a lightly tinted pill (no border/stroke)
+     tied to each card's own accent, sitting after the name and sized to
+     match its line height so it reads as a paired badge, not a
+     mismatched floating label. */
+  .state-code{
+    display:inline-flex;
+    align-items:center;
+    vertical-align:middle;
+    height:20px;
+    padding:0 6px;
+    border-radius:var(--radius-sm);
+    background:var(--slate-100);
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:10.5px;
+    line-height:1;
+    letter-spacing:.03em;
+    color:var(--slate-500);
+  }
+  /* rgba, not the indigo-50 token — that's the SAME color as the prefile
+     card's own background, so the pill was invisible against it. This
+     needs to be visibly deeper than whatever card it sits on. */
+  .state-card--prefile .state-code{background:rgba(79,70,229,.15);color:var(--indigo-600);}
+  .state-card--special .state-code{background:var(--raspberry-50);color:var(--raspberry-500);}
   .badges{display:flex;align-items:center;gap:5px;flex-wrap:wrap;justify-content:flex-end;}
+  /* Fixed height + flex-center (not padding-based vertical centering) —
+     padding alone kept looking asymmetric top/bottom regardless of the
+     numeric values used, because that's a font-metric issue (ascender/
+     descender asymmetry), not a padding bug. A fixed height with content
+     centered inside it sidesteps that problem regardless of which font
+     ends up here. */
   .badge{
     display:inline-flex;
     align-items:center;
+    justify-content:center;
+    height:20px;
     font-family:'JetBrains Mono',monospace;
     font-size:10px;
     line-height:1;
     text-transform:uppercase;
     letter-spacing:.04em;
-    padding:4px 7px 3px;
+    padding:0 8px;
     border-radius:var(--radius-sm);
-    font-weight:500;
+    font-weight:700;
     border:1px solid transparent;
   }
   .badge.carry{background:var(--violet-50);color:var(--violet-700);border-color:rgba(124,58,237,.25);}
+  .badge.complete{background:var(--slate-100);color:var(--slate-500);}
   /* Bold, filled "what kind of card is this" pills — inverted from the
      lighter outlined style used for secondary attributes like "Carries
      '28", so the card TYPE is the first thing that registers, from
@@ -318,7 +696,7 @@
   .badge.prefile-badge{background:var(--indigo-600);color:#fff;}
   /* Session badge is quiet (tinted, not solid) until the session is
      actually happening — green only means "go" once it's true. Solid
-     fill + "Session Active" label kick in exactly when today falls
+     fill + "In Session" label kick in exactly when today falls
      inside the session window, computed in badgesHTML(). */
   .badge.session-badge{background:var(--emerald-100);color:var(--emerald-700);border-color:rgba(5,150,105,.3);}
   .badge.session-badge.active{background:var(--emerald-600);color:#fff;border-color:transparent;}
@@ -338,14 +716,14 @@
   .state-card--prefile .state-name{color:var(--indigo-700);}
   .prefile-body{flex:1;display:flex;flex-direction:column;justify-content:flex-start;padding-top:4px;}
   .prefile-date{
-    font-family:'JetBrains Mono',monospace;
-    font-weight:600;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
     font-size:20px;
     color:var(--slate-900);
     margin-bottom:4px;
   }
   .prefile-copy{
-    font-family:'Public Sans',sans-serif;
+    font-family:'Satoshi',sans-serif;
     font-size:12.5px;
     color:var(--slate-600);
     line-height:1.4;
@@ -369,7 +747,7 @@
   .badge.special-badge{background:var(--raspberry-500);color:#fff;}
 
   .past-divider{
-    font-family:'JetBrains Mono',monospace;
+    font-family:'Satoshi',sans-serif;
     font-size:11px;
     text-transform:uppercase;
     letter-spacing:.1em;
@@ -404,7 +782,7 @@
     display:inline-flex;
     align-items:center;
     gap:5px;
-    font-family:'JetBrains Mono',monospace;
+    font-family:'Satoshi',sans-serif;
     font-size:10px;
     line-height:1;
     font-weight:500;
@@ -437,11 +815,10 @@
   .meter-dates{
     display:flex;
     justify-content:space-between;
-    font-family:'JetBrains Mono',monospace;
+    font-family:'Satoshi',sans-serif;
     font-size:10.5px;
     color:var(--slate-800);
   }
-  .table-meter{width:140px;margin:0;}
 
   /* duration caption: visually separated from the dates above it with its
      own top border + spacing, so it reads as a distinct secondary stat
@@ -450,20 +827,167 @@
     margin-top:auto;
     padding-top:8px;
     border-top:1px solid var(--slate-100);
-    font-family:'JetBrains Mono',monospace;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
     font-size:11px;
     color:var(--slate-500);
   }
-  .days-caption b{color:var(--slate-700);font-weight:600;}
+  .days-caption b{font-family:'Plus Jakarta Sans',sans-serif;color:var(--slate-700);font-weight:700;}
   .days-caption b.status-soon{color:var(--emerald-700);}
   .days-caption b.status-urgent{color:var(--amber-700);}
+  .status-days{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:11px;
+    margin-left:8px;
+  }
+  .status-days.status-soon{color:var(--emerald-700);}
+  .status-days.status-urgent{color:var(--amber-700);}
 
   /* TABLE VIEW */
-  .table-wrap{overflow-x:auto;border:1px solid var(--slate-200);border-radius:var(--radius-lg);background:#fff;}
+  .table-wrap{border:1px solid var(--slate-200);border-radius:var(--radius-lg);background:#fff;}
+
+  /* TIMELINE VIEW */
+  .timeline-controls{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+    margin-bottom:16px;
+  }
+  .year-toggle{display:flex;background:var(--white-faint);border:1px solid var(--white-hairline);border-radius:var(--radius-full);padding:3px;}
+  .year-toggle button{
+    border:none;background:transparent;padding:6px 16px;
+    font-family:'Satoshi',sans-serif;font-weight:700;font-size:13px;
+    color:var(--white-muted);border-radius:var(--radius-full);cursor:pointer;
+  }
+  .year-toggle button.active{background:var(--raspberry-500);color:#fff;}
+  .timeline-legend{display:flex;flex-wrap:wrap;gap:16px;font-family:'Satoshi',sans-serif;font-size:12px;color:var(--white-muted);}
+  .timeline-legend span{display:flex;align-items:center;gap:6px;}
+  .tl-swatch{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex:none;}
+  .tl-swatch--bar{width:16px;height:6px;border-radius:2px;background:var(--emerald-600);}
+  .tl-swatch--dot{width:8px;height:8px;border-radius:50%;background:var(--indigo-600);}
+  .tl-swatch--bolt{background:var(--raspberry-500);color:#fff;width:13px;height:13px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;}
+  .tl-swatch--bolt svg{width:60%;height:60%;}
+  .tl-swatch--today{width:0;height:14px;border-left:2px dashed var(--raspberry-300);}
+
+  .timeline-wrap{background:#fff;border:1px solid var(--slate-200);border-radius:var(--radius-lg);}
+  .timeline-header{position:sticky;top:0;z-index:3;display:flex;border-bottom:1px solid var(--slate-200);background:var(--slate-50);border-radius:var(--radius-lg) var(--radius-lg) 0 0;}
+  .timeline-name-col{width:140px;flex:none;padding:10px 12px;}
+  .timeline-axis-col{
+    flex:1;
+    display:flex;
+    position:relative;
+    padding:10px 8px;
+  }
+  .timeline-axis-col span{
+    flex:1;
+    text-align:center;
+    font-family:'Satoshi',sans-serif;
+    font-weight:700;
+    font-size:10.5px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    color:var(--slate-500);
+  }
+  .timeline-body{position:relative;}
+  .timeline-row{display:flex;align-items:center;border-bottom:1px solid var(--slate-100);min-height:34px;}
+  .timeline-row:last-child{border-bottom:none;}
+  .timeline-row .timeline-name-col{
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:12.5px;
+    color:var(--slate-900);
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .timeline-row .timeline-axis-col{padding:0 8px;height:34px;}
+  .tl-track{
+    position:absolute;
+    left:8px;right:8px;top:50%;
+    height:1px;
+    background:var(--slate-100);
+  }
+  .tl-track-ticks{
+    position:absolute;
+    left:8px;right:8px;top:0;bottom:0;
+    display:flex;
+    pointer-events:none;
+  }
+  .tl-track-ticks div{flex:1;border-left:1px solid var(--slate-100);}
+  .tl-bar{position:absolute;top:50%;transform:translateY(-50%);height:8px;border-radius:4px;overflow:hidden;background:var(--slate-200);cursor:pointer;}
+  .tl-bar-fill{position:absolute;top:0;left:0;bottom:0;background:var(--emerald-600);}
+  .tl-dot{
+    position:absolute;top:50%;
+    width:9px;height:9px;
+    border-radius:50%;
+    background:var(--indigo-600);
+    border:2px solid #fff;
+    box-shadow:0 0 0 1px var(--indigo-600);
+    transform:translate(-50%,-50%);
+    cursor:pointer;
+  }
+  .icon-badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    vertical-align:middle;
+    flex:none;
+    border-radius:50%;
+    color:#fff;
+  }
+  .icon-badge svg{width:60%;height:60%;}
+  /* Only for icon-badges sitting inline in running text (the caption's
+     "Starts in 2 days"), which has no flex gap to space it automatically —
+     the stat-summary usage already gets spacing from its own flex gap. */
+  .icon-badge--inline{margin-right:5px;}
+  .tl-bolt{
+    position:absolute;top:50%;
+    width:15px;height:15px;
+    border-radius:50%;
+    background:var(--raspberry-500);
+    color:#fff;
+    display:flex;align-items:center;justify-content:center;
+    transform:translate(-50%,-50%);
+    cursor:pointer;
+  }
+  .tl-bolt svg{width:9px;height:9px;}
+  .tl-today-line{
+    position:absolute;
+    top:0;bottom:0;
+    width:0;
+    border-left:2px dashed var(--raspberry-500);
+    z-index:5;
+    pointer-events:none;
+  }
+  .tl-today-label{
+    position:absolute;
+    top:-10px;
+    transform:translateX(-50%);
+    background:var(--raspberry-500);
+    color:#fff;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:9px;
+    text-transform:uppercase;
+    letter-spacing:.04em;
+    padding:2px 6px;
+    border-radius:var(--radius-sm);
+    white-space:nowrap;
+  }
+  @media (max-width:640px){
+    .timeline-name-col{width:88px;font-size:11px;}
+  }
   table{width:100%;border-collapse:collapse;font-size:13.5px;}
   th,td{padding:11px 14px;text-align:left;white-space:nowrap;}
   thead th{
-    font-family:'JetBrains Mono',monospace;
+    position:sticky;
+    top:0;
+    z-index:3;
+    background:#fff;
+    font-family:'Satoshi',sans-serif;
     font-size:11px;
     font-weight:500;
     text-transform:uppercase;
@@ -489,7 +1013,7 @@
   tbody tr:hover{background:var(--slate-50);}
   tbody tr:last-child{border-bottom:none;}
   td.state{font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;color:var(--slate-900);}
-  td.mono{font-family:'JetBrains Mono',monospace;color:var(--slate-500);}
+  td.mono{font-family:'Satoshi',sans-serif;color:var(--slate-500);}
   /* Ties the table back to the card view's color language, so switching
      between By Month and By State doesn't feel like two different apps:
      indigo = prefile, sky = crossover, emerald = session (matches the
@@ -497,7 +1021,7 @@
   td.mono.col-prefile{color:var(--indigo-700);font-weight:500;}
   td.mono.col-crossover{color:var(--sky-700);font-weight:500;}
   td.mono.col-session{color:var(--emerald-700);font-weight:500;}
-  .yes{color:var(--slate-700);font-weight:600;}
+  .yes{color:var(--slate-700);font-weight:700;}
   .no{color:var(--slate-300);}
 
   .note{
@@ -512,7 +1036,7 @@
   }
 
   @media (max-width:640px){
-    .hero{padding:40px 16px 32px;}
+    .hero-inner{padding:40px 16px 32px;}
     thead{display:none;}
     table, tbody, tr, td{display:block;width:100%;}
     tbody tr{padding:10px 14px;border-bottom:1px solid var(--slate-100);}
@@ -520,7 +1044,7 @@
     td.state{font-size:16px;margin-bottom:4px;}
     td:before{
       content:attr(data-label);
-      font-family:'JetBrains Mono',monospace;
+      font-family:'Satoshi',sans-serif;
       font-size:10px;
       text-transform:uppercase;
       color:var(--slate-500);
@@ -542,10 +1066,16 @@
 
 <div class="page">
 
+  <div class="section-title">Sessions at a Glance</div>
+  <div class="stat-summary" id="stat-summary"></div>
+
+  <div class="section-title" style="margin-top:44px;">Legislative Calendar</div>
+
   <div class="controls">
     <div class="view-toggle">
       <button id="btn-month" class="active">By Month</button>
       <button id="btn-state">By State</button>
+      <button id="btn-timeline">Timeline</button>
     </div>
     <div class="search-wrap">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
@@ -583,7 +1113,7 @@
         <thead>
           <tr>
             <th data-sort="name">State<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
-            <th data-sort="start">In Session<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
+            <th data-sort="start">Status<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
             <th data-sort="prefile">Prefile<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
             <th data-sort="start">Convene<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
             <th data-sort="end">Adjourn<svg class="sort-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="7 8 12 3 17 8"/><polyline points="7 16 12 21 17 16"/></svg></th>
@@ -593,6 +1123,25 @@
         </thead>
         <tbody id="table-body"></tbody>
       </table>
+    </div>
+  </div>
+
+  <div id="timeline-view" style="display:none;">
+    <div class="timeline-controls">
+      <div class="year-toggle" id="year-toggle"></div>
+      <div class="timeline-legend">
+        <span><i class="tl-swatch tl-swatch--bar"></i>Session (filled = elapsed)</span>
+        <span><i class="tl-swatch tl-swatch--dot"></i>Prefile</span>
+        <span><i class="tl-swatch tl-swatch--bolt"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 4 14 12 14 11 22 20 10 12 10 13 2"/></svg></i>Special Session</span>
+        <span><i class="tl-swatch tl-swatch--today"></i>Today</span>
+      </div>
+    </div>
+    <div class="timeline-wrap">
+      <div class="timeline-header">
+        <div class="timeline-name-col"></div>
+        <div class="timeline-axis-col" id="timeline-months"></div>
+      </div>
+      <div class="timeline-body" id="timeline-body"></div>
     </div>
   </div>
 
@@ -772,12 +1321,12 @@ function sessionStatusText(r){
   if(today<start){
     const d = Math.round((start-today)/DAY);
     const label = d===0 ? "Starts today" : `Starts in ${d} day${d===1?'':'s'}`;
-    return `<b class="status-soon">${label}</b>`;
+    return `${iconBadge(ICON_PLAY, 'var(--emerald-600)', 15, true)}<b class="status-soon">${label}</b>`;
   }
   if(today>end) return "Complete";
   const d = Math.round((end-today)/DAY);
   const label = d<=0 ? "Last day" : `${d} day${d===1?'':'s'} left`;
-  return `<b class="status-urgent">${label}</b>`;
+  return `${iconBadge(ICON_HOURGLASS, 'var(--amber-600)', 15, true)}<b class="status-urgent">${label}</b>`;
 }
 
 function meterHTML(r){
@@ -790,13 +1339,33 @@ function meterHTML(r){
 // Convene/Adjourn already have their own columns there. Uses the exact
 // same elapsed-percentage logic as the card meter: same element, same
 // meaning, everywhere on the page.
-function tableMeterHTML(r){
-  const pct = sessionElapsedPct(r);
-  return `<div class="yearmeter table-meter"><div class="fill" style="left:0%;width:${pct}%;"></div></div>`;
+// Table status cell — same status language as the card badge (quiet by
+// default, solid green + "Active" only while genuinely in session), not
+// a progress bar. The table already has explicit Convene/Adjourn date
+// columns, so a bar here was redundant with information already on the
+// row; what the table actually needed was the same clear active/upcoming/
+// complete signal the cards already have.
+// Same badge as before, plus the same green/orange countdown language
+// already used on the cards — kept on one line (not stacked) so table
+// rows stay compact and scannable rather than doubling row height.
+function tableStatusHTML(r){
+  const today = new Date(); today.setHours(0,0,0,0);
+  const start = new Date(r.start+"T00:00:00");
+  const end = new Date(r.end+"T00:00:00");
+  const DAY = 86400000;
+  if(today>=start && today<=end){
+    const d = Math.round((end-today)/DAY);
+    const label = d<=0 ? "Last day" : `${d}d left`;
+    return `<span class="badge session-badge active">Active</span><span class="status-days status-urgent">${label}</span>`;
+  }
+  if(today>end) return `<span class="badge complete">Complete</span>`;
+  const d = Math.round((start-today)/DAY);
+  const label = d===0 ? "Starts today" : `Starts in ${d}d`;
+  return `<span class="badge session-badge">Upcoming</span><span class="status-days status-soon">${label}</span>`;
 }
 
 // The session badge itself is the "green = go" signal: quiet/tinted by
-// default, and only turns solid green with an explicit "Session Active"
+// default, and only turns solid green with an explicit "In Session"
 // label once today actually falls inside the convene→adjourn window.
 function badgesHTML(r){
   const today = new Date(); today.setHours(0,0,0,0);
@@ -804,7 +1373,7 @@ function badgesHTML(r){
   const end = new Date(r.end+"T00:00:00");
   const active = today>=start && today<=end;
   const sessionBadge = active
-    ? `<span class="badge session-badge active">Session Active</span>`
+    ? `<span class="badge session-badge active">In Session</span>`
     : `<span class="badge session-badge">Session</span>`;
   const carry = r.carry27 ? `<span class="badge carry">Carries '28</span>` : "";
   return `${sessionBadge}${carry}`;
@@ -816,9 +1385,9 @@ function badgesHTML(r){
 // keeps the same top-row / body / caption rhythm as a session card so
 // the two don't feel like they're from different systems.
 function prefileCardHTML(r){
-  return `<div class="state-card state-card--prefile">
+  return `<div class="state-card state-card--prefile" data-scroll-date="${r.prefile}">
     <div class="state-row-top">
-      <div class="state-name">${r.n}</div>
+      <div class="state-name"><span class="state-code">${stateCode(r.n)}</span>${r.n}</div>
       <span class="badge prefile-badge">Prefile</span>
     </div>
     <div class="prefile-body">
@@ -836,10 +1405,10 @@ function prefileCardHTML(r){
 function specialCardHTML(entry){
   const row = data.find(d=>d.n===entry.n);
   const regularNote = row ? `Regular session <b>${fmt(row.start)}</b>` : "";
-  return `<div class="state-card state-card--special">
+  return `<div class="state-card state-card--special" data-scroll-date="${entry.date}">
     <div class="state-row-top">
-      <div class="state-name">${entry.n}</div>
-      <span class="badge special-badge">Special session</span>
+      <div class="state-name"><span class="state-code">${stateCode(entry.n)}</span>${entry.n}</div>
+      <span class="badge special-badge">Special Session</span>
     </div>
     <div class="prefile-body">
       <div class="prefile-date">${fmt(entry.date)}</div>
@@ -850,9 +1419,9 @@ function specialCardHTML(entry){
 }
 
 function sessionCardHTML(r){
-  return `<div class="state-card">
+  return `<div class="state-card" data-scroll-date="${r.start}">
     <div class="state-row-top">
-      <div class="state-name">${r.n}</div>
+      <div class="state-name"><span class="state-code">${stateCode(r.n)}</span>${r.n}</div>
       <div class="badges">${badgesHTML(r)}</div>
     </div>
     ${meterHTML(r)}
@@ -862,6 +1431,16 @@ function sessionCardHTML(r){
 }
 
 const MONTHS_LONG = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+// Small inline marker wherever the date changes within a month's grid —
+// deliberately lightweight (just a label + thin rule) rather than a full
+// boxed header, so date-clustering is visible without the vertical cost
+// a heavier per-date header would add.
+function dateDividerHTML(dateStr){
+  const d = new Date(dateStr+"T00:00:00");
+  const label = d.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+  return `<div class="date-divider">${label}</div>`;
+}
 
 function emptyStateHTML(message, sub){
   return `<div class="empty-state">
@@ -988,8 +1567,24 @@ function renderMonthView(rows){
     g.items.sort((a,b)=> new Date(a.date)-new Date(b.date) || a.r.n.localeCompare(b.r.n));
     const sec = document.createElement("div");
     sec.className = "month-section";
+    // Thin inline date dividers between cards where the date actually
+    // changes — NOT a full boxed header per date (that fragments the
+    // grid into mostly lonely single-card rows, confirmed against the
+    // real data: 4 of January's 11 distinct dates would've been a single
+    // card sitting alone). This just adds a small label + rule wherever
+    // the date shifts, spanning the grid via grid-column:1/-1, without
+    // forcing the same heavy per-date overhead.
+    let cardsHTML = "";
+    let lastDate = null;
+    g.items.forEach(ev=>{
+      if(ev.date !== lastDate){
+        cardsHTML += dateDividerHTML(ev.date);
+        lastDate = ev.date;
+      }
+      cardsHTML += ev.type==="prefile" ? prefileCardHTML(ev.r) : ev.type==="special" ? specialCardHTML(ev.r) : sessionCardHTML(ev.r);
+    });
     sec.innerHTML = `<div class="month-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${MONTHS_LONG[g.month]} ${g.year} <span class="count">(${g.items.length})</span></h2><div class="abbr-legend"><span><b>XO</b> = Crossover</span><span><b>BID</b> = Bill Introduction Deadline</span></div></div>
-      <div class="card-grid">${g.items.map(ev=> ev.type==="prefile" ? prefileCardHTML(ev.r) : ev.type==="special" ? specialCardHTML(ev.r) : sessionCardHTML(ev.r)).join("")}</div>`;
+      <div class="card-grid">${cardsHTML}</div>`;
     el.appendChild(sec);
   });
 }
@@ -1014,8 +1609,8 @@ function renderTableView(rows){
   }
   tbody.innerHTML = sorted.map(r=>`
     <tr>
-      <td class="state" data-label="State">${r.n}</td>
-      <td data-label="In Session">${tableMeterHTML(r)}</td>
+      <td class="state" data-label="State"><span class="state-code">${stateCode(r.n)}</span> ${r.n}</td>
+      <td data-label="Status">${tableStatusHTML(r)}</td>
       <td class="mono col-prefile" data-label="Prefile">${fmt(r.prefile)}</td>
       <td class="mono col-session" data-label="Convene">${fmt(r.start)}</td>
       <td class="mono col-session" data-label="Adjourn">${fmt(r.end)}</td>
@@ -1028,6 +1623,407 @@ function renderTableView(rows){
   });
 }
 
+// Compact 2-letter codes so stat chips can stay small, uniform squares
+// instead of sizing to each state's full name. Title attribute carries
+// the full name for anyone hovering.
+const STATE_CODE = {
+  "Alabama":"AL","Alaska":"AK","Arizona":"AZ","Arkansas":"AR","California":"CA",
+  "Colorado":"CO","Connecticut":"CT","Delaware":"DE","Florida":"FL","Georgia":"GA",
+  "Hawaii":"HI","Idaho":"ID","Illinois":"IL","Indiana":"IN","Iowa":"IA",
+  "Kansas":"KS","Kentucky":"KY","Louisiana":"LA","Maine":"ME","Maryland":"MD",
+  "Massachusetts":"MA","Michigan":"MI","Minnesota":"MN","Mississippi":"MS","Missouri":"MO",
+  "Montana":"MT","Nebraska":"NE","Nevada":"NV","New Hampshire":"NH","New Jersey":"NJ",
+  "New Mexico":"NM","New York":"NY","North Carolina":"NC","North Dakota":"ND","Ohio":"OH",
+  "Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA","Rhode Island":"RI","South Carolina":"SC",
+  "South Dakota":"SD","Tennessee":"TN","Texas":"TX","Utah":"UT","Vermont":"VT",
+  "Virginia":"VA","Washington":"WA","West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY"
+};
+function stateCode(name){ return STATE_CODE[name] || name.slice(0,2).toUpperCase(); }
+
+// One chip per state/event, color-coded to match the same language used
+// everywhere else on the page (green = active/soon, orange = urgent,
+// raspberry = special). Clicking jumps to that state's card.
+function statChip(name, cls, cardType, infoType){
+  return `<button class="stat-chip ${cls}" data-state="${name}" data-card-type="${cardType}" data-info-type="${infoType}" title="${name}">${stateCode(name)}</button>`;
+}
+
+// Small stroke icons for each group heading — same visual language as
+// the calendar/sort icons used elsewhere, giving each stat group a
+// distinct, quickly-recognizable identity rather than relying on the
+// heading text alone to signal what kind of thing it is.
+const ICON_PULSE = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>`;
+// Filled (not outlined) so it reads clearly as a solid white icon sitting
+// inside a raspberry circle badge, rather than a thin stroke on its own.
+const ICON_BOLT = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="13 2 4 14 12 14 11 22 20 10 12 10 13 2"/></svg>`;
+// Reusable "white icon in a colored circle" wrapper — used for all
+// three sub-group icons so they share one visual treatment instead of
+// bolt getting special styling the other two don't have.
+function iconBadge(icon, color, size, inline){
+  return `<span class="icon-badge${inline?' icon-badge--inline':''}" style="width:${size}px;height:${size}px;background:${color};">${icon}</span>`;
+}
+// Play triangle, not an arrow — "about to start" reads more clearly as
+// on-deck/coming-soon than a directional arrow did, and it's a shape
+// none of the other icons on the page use, so it stays visually distinct.
+const ICON_PLAY = `<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 3 20 12 6 21 6 3"/></svg>`;
+const ICON_HOURGLASS = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h12M6 22h12M6 2c0 6 6 6 6 10s-6 4-6 10M18 2c0 6-6 6-6 10s6 4 6 10"/></svg>`;
+
+// Year-at-a-glance density: how many states are in session during each
+// calendar month, regardless of today's date. This is what fills the
+// left column meaningfully on a day when the LIVE count happens to be
+// low (0-3 states) — the live count will always sometimes be small,
+// that's just what "right now" means, so padding around it doesn't fix
+// anything. A real macro view does.
+function sessionDensityByMonth(year){
+  const counts = new Array(12).fill(0);
+  for(let m=0;m<12;m++){
+    const monthStart = new Date(year, m, 1).getTime();
+    const monthEnd = new Date(year, m+1, 1).getTime();
+    counts[m] = data.filter(r=>{
+      const s = new Date(r.start+"T00:00:00").getTime();
+      const e = new Date(r.end+"T00:00:00").getTime();
+      return e >= monthStart && s < monthEnd;
+    }).length;
+  }
+  return counts;
+}
+function densityChartHTML(year){
+  const counts = sessionDensityByMonth(year);
+  const max = Math.max(...counts, 1);
+  const bars = counts.map((c,i)=>{
+    const pct = Math.max((c/max)*100, c>0?8:0);
+    return `<div class="density-bar" title="${MONTHS_SHORT[i]} ${year}: ${c} state${c===1?'':'s'} in session">
+      <div class="density-bar-fill" style="height:${pct}%;"></div>
+      <span class="density-bar-label">${MONTHS_SHORT[i][0]}</span>
+    </div>`;
+  }).join("");
+  return `<div class="density-chart-wrap">
+    <div class="density-chart-title">${year} session density</div>
+    <div class="density-chart">${bars}</div>
+  </div>`;
+}
+
+// Picks whichever of "this year" / "next year" actually has more
+// session data to show — avoids hardcoding a specific year that would
+// go stale once the dataset rolls forward.
+function bestDensityYear(){
+  const y1 = new Date().getFullYear();
+  const y2 = y1+1;
+  const c1 = sessionDensityByMonth(y1).reduce((a,b)=>a+b,0);
+  const c2 = sessionDensityByMonth(y2).reduce((a,b)=>a+b,0);
+  return c2>c1 ? y2 : y1;
+}
+
+function renderStatSummary(){
+  const inSession = data.filter(r => matchesStatus(r,"inSession"));
+  const startingSoon = data.filter(r => matchesStatus(r,"startingSoon"));
+  const endingSoon = data.filter(r => matchesStatus(r,"endingSoon"));
+  const specialNow = specialSessions;
+
+  const chipsOrEmpty = (list, cls, cardType, infoType, emptyText) =>
+    list.length
+      ? `<div class="stat-chips">${list.map(r=>statChip(r.n, cls, cardType, infoType)).join("")}</div>`
+      : `<div class="stat-empty">${emptyText}</div>`;
+
+  document.getElementById("stat-summary").innerHTML = `
+    <div class="stat-card stat-card--unified">
+      <div class="stat-col-left">
+        <div class="stat-inline-head">
+          <span class="stat-icon" style="color:var(--emerald-600);">${ICON_PULSE}</span>
+          <h4>In Session</h4>
+          <span class="stat-count">(${inSession.length})</span>
+        </div>
+        ${chipsOrEmpty(inSession, "chip-session", "session", "session", "No states are currently in session.")}
+        ${densityChartHTML(bestDensityYear())}
+      </div>
+      <div class="stat-col-right">
+        <div class="stat-group" style="--group-color:var(--raspberry-500);">
+          <div class="stat-group-label">${iconBadge(ICON_BOLT, 'var(--raspberry-500)', 16)}Special Session <span class="stat-count">(${specialNow.length})</span></div>
+          ${specialNow.length
+            ? `<div class="stat-chips">${specialNow.map(sp=>statChip(sp.n,"chip-special","special","special")).join("")}</div>`
+            : `<div class="stat-empty">None right now.</div>`}
+        </div>
+        <div class="stat-group" style="--group-color:var(--emerald-600);">
+          <div class="stat-group-label">${iconBadge(ICON_PLAY, 'var(--emerald-600)', 16)}Starting Soon <span class="stat-count">(${startingSoon.length})</span></div>
+          ${chipsOrEmpty(startingSoon, "chip-soon", "session", "soon", "None in the next 30 days.")}
+        </div>
+        <div class="stat-group" style="--group-color:var(--amber-600);">
+          <div class="stat-group-label">${iconBadge(ICON_HOURGLASS, 'var(--amber-600)', 16)}Ending Soon <span class="stat-count">(${endingSoon.length})</span></div>
+          ${chipsOrEmpty(endingSoon, "chip-urgent", "session", "urgent", "None in the next 30 days.")}
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.querySelectorAll(".stat-chip").forEach(btn=>{
+    btn.addEventListener("mouseenter", ()=>{ cancelStatHide(); showStatPopover(btn); });
+    btn.addEventListener("mouseleave", ()=> scheduleStatHide());
+    btn.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      if(pinnedPopover===btn){ hideStatPopover(); return; }
+      pinnedPopover = btn;
+      showStatPopover(btn);
+    });
+  });
+}
+
+// One shared popover element, repositioned/repurposed per chip, rather
+// than one hidden popover per chip in the DOM. Shows on hover on
+// desktop; on touch devices (no real hover) the click handler above
+// "pins" it open instead, so tapping works the same way hovering does.
+let pinnedPopover = null;
+function statChipInfo(r, infoType){
+  if(infoType==="session"){
+    const total = daysBetween(r.start, r.end);
+    const left = Math.max(0, daysBetween(new Date().toISOString().slice(0,10), r.end));
+    return `${total} days total &middot; ${left} days left`;
+  }
+  if(infoType==="special") return `${r.reason} &middot; ${fmt(r.date)}`;
+  if(infoType==="soon") return `Convenes ${fmt(r.start)}`;
+  if(infoType==="urgent") return `Adjourns ${fmt(r.end)}`;
+  return "";
+}
+// Generic popover renderer, shared by the stat-summary chips (which get
+// a jump button) and the timeline markers (which don't — you're already
+// looking at everything on the timeline, there's nothing to jump to).
+function renderPopover(anchorEl, titleText, infoHtml, jumpConfig){
+  let pop = document.getElementById("stat-popover");
+  if(!pop){
+    pop = document.createElement("div");
+    pop.id = "stat-popover";
+    pop.className = "stat-popover";
+    document.body.appendChild(pop);
+    pop.addEventListener("mouseenter", ()=> cancelStatHide());
+    pop.addEventListener("mouseleave", ()=> scheduleStatHide());
+  }
+  pop.innerHTML = `
+    <div class="stat-popover-title">${titleText}</div>
+    <div class="stat-popover-info">${infoHtml}</div>
+    ${jumpConfig ? `<button class="stat-popover-jump">Jump to card ↓</button>` : ""}
+  `;
+  const rect = anchorEl.getBoundingClientRect();
+  pop.style.left = (rect.left + rect.width/2 + window.scrollX) + "px";
+  pop.style.top = (rect.bottom + window.scrollY + 8) + "px";
+  pop.style.display = "block";
+  if(jumpConfig){
+    pop.querySelector(".stat-popover-jump").onclick = ()=>{
+      hideStatPopover();
+      jumpToCard(jumpConfig.stateName, jumpConfig.cardType);
+    };
+  }
+}
+
+function showStatPopover(btn){
+  const stateName = btn.dataset.state;
+  const cardType = btn.dataset.cardType;
+  const infoType = btn.dataset.infoType;
+  const record = cardType==="special" ? specialSessions.find(s=>s.n===stateName) : data.find(d=>d.n===stateName);
+  if(!record) return;
+  renderPopover(btn, stateName, statChipInfo(record, infoType), {stateName, cardType});
+}
+
+// Timeline markers: same popover styling, no jump button. Bars, dots,
+// and stars each carry their own state/type in data attributes so the
+// right info gets pulled at hover time.
+function timelineMarkerInfo(el){
+  const stateName = el.dataset.state;
+  const type = el.dataset.markerType;
+  if(type==="session"){
+    const r = data.find(d=>d.n===stateName);
+    if(!r) return null;
+    const total = daysBetween(r.start, r.end);
+    return { title: stateName, info: `Convenes ${fmt(r.start)} &middot; Adjourns ${fmt(r.end)} &middot; ${total} days total &middot; ${sessionStatusText(r).replace(/<[^>]+>/g,"")}` };
+  }
+  if(type==="prefile"){
+    const r = data.find(d=>d.n===stateName);
+    if(!r) return null;
+    return { title: stateName, info: `Prefile ${fmt(r.prefile)} &middot; Convenes ${fmt(r.start)}` };
+  }
+  if(type==="special"){
+    const sp = specialSessions.find(s=>s.n===stateName);
+    if(!sp) return null;
+    return { title: stateName, info: `${sp.reason} &middot; ${fmt(sp.date)}` };
+  }
+  return null;
+}
+function showTimelineTooltip(el){
+  const result = timelineMarkerInfo(el);
+  if(!result) return;
+  renderPopover(el, result.title, result.info, null);
+}
+
+let popoverHideTimer = null;
+// The gap between a chip and the popover below it (however small) is
+// enough for a mouseleave to fire before the cursor ever reaches the
+// popover, closing it before the "Jump to card" button was reachable.
+// Fix: hiding is delayed briefly, and cancelled if the cursor re-enters
+// either the chip or the popover within that window — the standard
+// pattern for any hover target whose content needs to be hoverable too.
+function scheduleStatHide(){
+  popoverHideTimer = setTimeout(()=>{ if(!pinnedPopover) hideStatPopover(); }, 200);
+}
+function cancelStatHide(){
+  if(popoverHideTimer){ clearTimeout(popoverHideTimer); popoverHideTimer=null; }
+}
+function hideStatPopover(){
+  cancelStatHide();
+  pinnedPopover = null;
+  const pop = document.getElementById("stat-popover");
+  if(pop) pop.style.display = "none";
+}
+document.addEventListener("click", (e)=>{
+  const pop = document.getElementById("stat-popover");
+  if(pop && !pop.contains(e.target) && !e.target.classList.contains("stat-chip")) hideStatPopover();
+});
+
+// Clicking a stat chip always works, regardless of whatever filters are
+// currently active — it resets them first so the target card is
+// guaranteed to actually be on screen, rather than jumping toward
+// something a filter is currently hiding.
+function jumpToCard(stateName, cardType){
+  filters = {q:"", prefile:false, carry:false, special:false, status:null};
+  document.getElementById("search").value = "";
+  document.querySelectorAll(".chip.active").forEach(c=>c.classList.remove("active"));
+
+  document.getElementById("btn-month").click();
+  render();
+
+  requestAnimationFrame(()=>{
+    const cardClass = cardType==="prefile" ? ".state-card--prefile"
+      : cardType==="special" ? ".state-card--special"
+      : ".state-card:not(.state-card--prefile):not(.state-card--special)";
+    const target = [...document.querySelectorAll(`${cardClass} .state-name`)]
+      .find(el => el.textContent === stateName)
+      ?.closest(".state-card");
+    if(!target) return;
+    target.scrollIntoView({behavior:"smooth", block:"center"});
+    target.classList.add("jump-highlight");
+    setTimeout(()=> target.classList.remove("jump-highlight"), 2000);
+  });
+}
+
+// TIMELINE VIEW
+// Jan–Dec of a single year — deliberately not both years at once, so it
+// never gets overloaded. Defaults to the real current year; toggling
+// switches the whole axis to next year rather than trying to show both.
+let timelineYear = new Date().getFullYear();
+const MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function yearBounds(y){
+  return { start: new Date(y,0,1).getTime(), end: new Date(y+1,0,1).getTime() };
+}
+function pctInYear(dateStr, bounds){
+  const t = new Date(dateStr+"T00:00:00").getTime();
+  return Math.max(0, Math.min(100, ((t-bounds.start)/(bounds.end-bounds.start))*100));
+}
+function overlapsYear(startStr, endStr, bounds){
+  const s = new Date(startStr+"T00:00:00").getTime();
+  const e = new Date(endStr+"T00:00:00").getTime();
+  return e >= bounds.start && s <= bounds.end;
+}
+function inYear(dateStr, bounds){
+  const t = new Date(dateStr+"T00:00:00").getTime();
+  return t >= bounds.start && t < bounds.end;
+}
+
+function renderYearToggle(){
+  const realYear = new Date().getFullYear();
+  document.getElementById("year-toggle").innerHTML = `
+    <button data-year="${realYear}" class="${timelineYear===realYear?'active':''}">${realYear}</button>
+    <button data-year="${realYear+1}" class="${timelineYear===realYear+1?'active':''}">${realYear+1}</button>
+  `;
+  document.querySelectorAll("#year-toggle button").forEach(btn=>{
+    btn.onclick = ()=>{ timelineYear = parseInt(btn.dataset.year,10); renderTimelineView(); };
+  });
+}
+
+function renderTimelineView(){
+  renderYearToggle();
+  const bounds = yearBounds(timelineYear);
+  const today = new Date(); today.setHours(0,0,0,0);
+  const todayInThisYear = today.getFullYear()===timelineYear;
+  const todayPct = todayInThisYear ? pctInYear(today.toISOString().slice(0,10), bounds) : null;
+
+  // Month header ticks
+  document.getElementById("timeline-months").innerHTML =
+    MONTHS_SHORT.map(m=>`<span>${m}</span>`).join("");
+
+  // Same filters already used elsewhere on the page — Timeline is one
+  // row per state (not one card per event type), so filters narrow rows
+  // here, the same way they already do on By State.
+  let rows = applyFilters(data);
+  if(filters.special) rows = rows.filter(r => specialSessions.some(sp=>sp.n===r.n));
+  if(filters.status) rows = rows.filter(r => matchesStatus(r, filters.status));
+
+  const body = document.getElementById("timeline-body");
+  if(rows.length === 0){
+    body.innerHTML = emptyStateHTML();
+    return;
+  }
+
+  body.innerHTML = rows.map(r=>{
+    let marks = "";
+    if(overlapsYear(r.start, r.end, bounds)){
+      const s = pctInYear(r.start, bounds);
+      const e = pctInYear(r.end, bounds);
+      const w = Math.max(e-s, 0.6);
+      // Split at today: filled (elapsed) to the left, gray (remaining)
+      // to the right — this is the SAME elapsed-percentage idea as the
+      // card meter, just positioned on the shared year axis instead of
+      // scaled to the session's own length. Every row shows local
+      // progress even if you've scrolled past the vertical today line.
+      let fillWidth;
+      if(todayPct===null){
+        fillWidth = new Date(r.end+"T00:00:00") < today ? w : 0;
+      } else {
+        fillWidth = Math.max(0, Math.min(w, todayPct - s));
+      }
+      marks += `<div class="tl-bar" style="left:${s}%;width:${w}%;" data-state="${r.n}" data-marker-type="session"><div class="tl-bar-fill" style="width:${(fillWidth/w)*100}%;"></div></div>`;
+    }
+    if(r.prefile && inYear(r.prefile, bounds)){
+      marks += `<div class="tl-dot" style="left:${pctInYear(r.prefile,bounds)}%;" data-state="${r.n}" data-marker-type="prefile"></div>`;
+    }
+    const special = specialSessions.find(sp=>sp.n===r.n && inYear(sp.date, bounds));
+    if(special){
+      marks += `<div class="tl-bolt" style="left:${pctInYear(special.date,bounds)}%;" data-state="${r.n}" data-marker-type="special">${ICON_BOLT}</div>`;
+    }
+    return `<div class="timeline-row">
+      <div class="timeline-name-col">${r.n}</div>
+      <div class="timeline-axis-col">
+        <div class="tl-track-ticks">${MONTHS_SHORT.map(()=>'<div></div>').join("")}</div>
+        <div class="tl-track"></div>
+        ${marks}
+      </div>
+    </div>`;
+  }).join("");
+
+  // Hover (desktop) / tap (mobile) tooltips on every marker — same
+  // popover system as the stat-summary chips, minus the jump button.
+  body.querySelectorAll(".tl-bar, .tl-dot, .tl-bolt").forEach(el=>{
+    el.addEventListener("mouseenter", ()=>{ cancelStatHide(); showTimelineTooltip(el); });
+    el.addEventListener("mouseleave", ()=> scheduleStatHide());
+    el.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      if(pinnedPopover===el){ hideStatPopover(); return; }
+      pinnedPopover = el;
+      showTimelineTooltip(el);
+    });
+  });
+
+  if(todayPct!==null){
+    // Measured from the actual rendered DOM rather than a hardcoded
+    // calc() guess at column widths — stays correct regardless of
+    // viewport size or the mobile breakpoint's narrower name column.
+    const firstAxis = body.querySelector(".timeline-axis-col");
+    if(firstAxis){
+      const bodyRect = body.getBoundingClientRect();
+      const axisRect = firstAxis.getBoundingClientRect();
+      const leftPx = (axisRect.left - bodyRect.left) + (axisRect.width * todayPct/100);
+      body.insertAdjacentHTML("beforeend",
+        `<div class="tl-today-line" style="left:${leftPx}px;"><div class="tl-today-label">Today</div></div>`);
+    }
+  }
+}
+
 function render(){
   const rows = applyFilters(data);
   document.getElementById("result-count").textContent = `Showing ${rows.length} of ${data.length} states`;
@@ -1035,23 +2031,23 @@ function render(){
   renderTableView(rows);
 }
 
-document.getElementById("btn-month").onclick = ()=>{
-  document.getElementById("btn-month").classList.add("active");
-  document.getElementById("btn-state").classList.remove("active");
-  document.getElementById("month-view").style.display = "";
-  document.getElementById("state-view").style.display = "none";
-  document.getElementById("status-controls").style.display = "";
-};
-document.getElementById("btn-state").onclick = ()=>{
-  document.getElementById("btn-state").classList.add("active");
-  document.getElementById("btn-month").classList.remove("active");
-  document.getElementById("state-view").style.display = "";
-  document.getElementById("month-view").style.display = "none";
-  // Status (in session / starting soon / ending soon) only has meaning
-  // for the card-based month view — By State stays the neutral,
-  // always-see-everything reference view per explicit request, so hide
-  // the control here rather than leave a visible toggle that does nothing.
-  document.getElementById("status-controls").style.display = "none";
+function setActiveTab(id){
+  ["btn-month","btn-state","btn-timeline"].forEach(b=>document.getElementById(b).classList.toggle("active", b===id));
+  document.getElementById("month-view").style.display = id==="btn-month" ? "" : "none";
+  document.getElementById("state-view").style.display = id==="btn-state" ? "" : "none";
+  document.getElementById("timeline-view").style.display = id==="btn-timeline" ? "" : "none";
+  // Status (in session / starting soon / ending soon) only has meaning for
+  // the card-based month view — By State and Timeline both stay neutral,
+  // always-see-everything reference views, so hide the control there
+  // rather than leave a visible toggle that does nothing.
+  document.getElementById("status-controls").style.display = id==="btn-month" ? "" : "none";
+  updateScrollDatePill();
+}
+document.getElementById("btn-month").onclick = ()=> setActiveTab("btn-month");
+document.getElementById("btn-state").onclick = ()=> setActiveTab("btn-state");
+document.getElementById("btn-timeline").onclick = ()=>{
+  setActiveTab("btn-timeline");
+  renderTimelineView();
 };
 // Status group is single-select: clicking an already-active chip clears
 // it, clicking a different one switches to it. Unlike the other filter
@@ -1097,8 +2093,43 @@ document.querySelectorAll("thead th").forEach(th=>{
   });
 });
 
+renderStatSummary();
 render();
+
+// Live scroll-position date readout — only meaningful in By Month (the
+// other two views don't have per-card dates scattered down a long
+// scroll the same way). Finds the last card whose top has scrolled past
+// a reference line near the top of the viewport (accounting for the
+// sticky month header), and shows that card's date.
+let scrollTickScheduled = false;
+function updateScrollDatePill(){
+  const pill = document.getElementById("scroll-date-pill");
+  const monthView = document.getElementById("month-view");
+  if(monthView.style.display === "none"){ pill.style.display = "none"; return; }
+  const cards = monthView.querySelectorAll("[data-scroll-date]");
+  if(!cards.length){ pill.style.display = "none"; return; }
+  const threshold = 130; // roughly clears the sticky month header
+  let currentDate = null;
+  for(const card of cards){
+    const rect = card.getBoundingClientRect();
+    if(rect.top <= threshold) currentDate = card.dataset.scrollDate;
+    else break; // cards are already in document/date order
+  }
+  if(!currentDate){ pill.style.display = "none"; return; }
+  const d = new Date(currentDate+"T00:00:00");
+  pill.textContent = d.toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'});
+  pill.style.display = "block";
+}
+window.addEventListener("scroll", ()=>{
+  if(scrollTickScheduled) return;
+  scrollTickScheduled = true;
+  requestAnimationFrame(()=>{ updateScrollDatePill(); scrollTickScheduled = false; });
+});
+
 </script>
+
+
+<div id="scroll-date-pill" class="scroll-date-pill" style="display:none;"></div>
 
 </body>
 </html>
