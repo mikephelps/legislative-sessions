@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>2027 Legislative Session Dates</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap');
@@ -59,6 +60,9 @@
     -webkit-font-smoothing:antialiased;
   }
   .page{max-width:var(--container-max);margin:0 auto;padding:0 var(--container-pad) 80px;}
+  @media (max-width:480px){
+    .page{padding-left:16px;padding-right:16px;}
+  }
 
   /* HEADER */
   .hero{
@@ -78,17 +82,65 @@
     font-weight:700;
     font-size:clamp(36px,6vw,52px);
     line-height:1.05;
+    max-width:1100px;
     margin:0 0 14px;
     letter-spacing:-0.025em;
     color:#fff;
   }
   .hero p{
-    max-width:560px;
+    max-width:700px;
     color:var(--white-muted);
     font-size:15px;
     line-height:1.65;
     margin:0;
   }
+  .hero p.hero-updated{
+    margin-top:18px;
+    padding-top:14px;
+    border-top:1px solid var(--white-hairline);
+    font-size:12.5px;
+    color:var(--white-muted);
+    opacity:.75;
+  }
+  .hero-signup{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    max-width:700px;
+    margin-top:22px;
+  }
+  .hero-signup-input{
+    flex:1;
+    min-width:220px;
+    background:var(--white-faint);
+    border:1px solid var(--white-hairline);
+    border-radius:var(--radius-lg);
+    padding:12px 18px;
+    font-family:'Satoshi',sans-serif;
+    font-size:14px;
+    color:#fff;
+  }
+  .hero-signup-input::placeholder{color:var(--white-muted);}
+  .hero-signup-input:focus{outline:2px solid var(--raspberry-500);outline-offset:1px;}
+  .hero-signup-btn{
+    flex:none;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    line-height:1;
+    background:var(--raspberry-500);
+    color:#fff;
+    font-family:'Plus Jakarta Sans',sans-serif;
+    font-weight:700;
+    font-size:14px;
+    border:none;
+    padding:14px 26px;
+    border-radius:var(--radius-full);
+    cursor:pointer;
+    box-shadow:0 6px 20px rgba(230,0,88,.35);
+    transition:background .15s ease;
+  }
+  .hero-signup-btn:hover{background:var(--raspberry-600);}
 
   /* CONTROLS */
   .controls{
@@ -569,6 +621,15 @@
     grid-template-columns:repeat(auto-fill,minmax(320px,1fr));
     gap:16px;
   }
+  /* Real bug, previously invisible: minmax(320px,...) is wider than the
+     usable width on most phones once you subtract page padding — this
+     was masked before by the missing viewport meta tag (phones were
+     never actually rendering at their true narrow width), so it never
+     visibly overflowed. Now that the tag is fixed, this needs its own
+     explicit mobile layout rather than relying on auto-fill to cope. */
+  @media (max-width:680px){
+    .card-grid{grid-template-columns:1fr;}
+  }
   .date-divider{
     grid-column:1 / -1;
     display:flex;
@@ -863,6 +924,26 @@
     color:var(--white-muted);border-radius:var(--radius-full);cursor:pointer;
   }
   .year-toggle button.active{background:var(--raspberry-500);color:#fff;}
+  .timeline-sort{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .timeline-sort-label{
+    font-family:'Satoshi',sans-serif;
+    font-weight:700;
+    font-size:12px;
+    color:var(--white-muted);
+    margin-right:2px;
+  }
+  .timeline-sort button{
+    border:1px solid var(--white-hairline);
+    background:var(--white-faint);
+    padding:6px 12px;
+    font-family:'Satoshi',sans-serif;
+    font-weight:700;
+    font-size:12px;
+    color:var(--white-muted);
+    border-radius:var(--radius-full);
+    cursor:pointer;
+  }
+  .timeline-sort button.active{background:var(--ultra-600);border-color:var(--ultra-600);color:#fff;}
   .timeline-legend{display:flex;flex-wrap:wrap;gap:16px;font-family:'Satoshi',sans-serif;font-size:12px;color:var(--white-muted);}
   .timeline-legend span{display:flex;align-items:center;gap:6px;}
   .tl-swatch{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;flex:none;}
@@ -1059,8 +1140,18 @@
 <div class="hero">
   <div class="hero-inner">
     <div class="eyebrow">50-State Legislative Calendar</div>
-    <h1>Know when to start watching.<br>Not just when the session starts.</h1>
-    <p>Some states let bills drop weeks before session even opens. This tracks both moments, prefiling and convene, across all 50 states, always sorted by what's coming up next.</p>
+    <h1>Know when to start watching. Not just when the session starts.</h1>
+    <p>Most states allow bills to be prefiled before session opens. This dashboard tracks prefiling and session dates, along with other key deadlines, so you can be prepared for next year's legislative session.</p>
+    <!-- Static markup only — no submission wired up yet, per request. -->
+    <div class="hero-signup">
+      <input type="email" class="hero-signup-input" placeholder="you@organization.com">
+      <button type="button" class="hero-signup-btn">Sign up for updates</button>
+    </div>
+    <!-- Hardcoded for the prototype — in production this should read
+         from an actual data-refresh timestamp, not just "today", since
+         a dynamically-computed today's-date here would misleadingly
+         imply the underlying data was actually refreshed today. -->
+    <p class="hero-updated">Last updated on September 16, 2026</p>
   </div>
 </div>
 
@@ -1129,6 +1220,7 @@
   <div id="timeline-view" style="display:none;">
     <div class="timeline-controls">
       <div class="year-toggle" id="year-toggle"></div>
+      <div class="timeline-sort" id="timeline-sort"></div>
       <div class="timeline-legend">
         <span><i class="tl-swatch tl-swatch--bar"></i>Session (filled = elapsed)</span>
         <span><i class="tl-swatch tl-swatch--dot"></i>Prefile</span>
@@ -1269,13 +1361,13 @@ function daysStatHTML(r){
 
 // Crossover is the only thing that still shows as a chip on the session
 // card — prefile now gets its own dedicated card (see renderMonthView).
-// Bill Introduction Deadline (BID) is optional — comes from a CMS field
+// Bill Introduction Deadline (shown as "DL") is optional — comes from a CMS field
 // that won't always be set. When it exists, it always renders to the
 // LEFT of Crossover (chronologically it happens first: bills must be
 // introduced before the chamber crossover deadline).
 function chipRowHTML(r){
   let html = "";
-  if(r.bid) html += `<span class="tag bid"><i class="cdot"></i>BID ${fmt(r.bid)}</span>`;
+  if(r.bid) html += `<span class="tag bid"><i class="cdot"></i>DL ${fmt(r.bid)}</span>`;
   if(r.crossover) html += `<span class="tag crossover"><i class="cdot"></i>XO ${fmt(r.crossover)}</span>`;
   // Always render the container, even empty — reserving this space
   // consistently keeps a plain session card's internal rhythm matching
@@ -1385,7 +1477,7 @@ function badgesHTML(r){
 // keeps the same top-row / body / caption rhythm as a session card so
 // the two don't feel like they're from different systems.
 function prefileCardHTML(r){
-  return `<div class="state-card state-card--prefile" data-scroll-date="${r.prefile}">
+  return `<div class="state-card state-card--prefile" data-scroll-date="${r.prefile}" data-state="${r.n}">
     <div class="state-row-top">
       <div class="state-name"><span class="state-code">${stateCode(r.n)}</span>${r.n}</div>
       <span class="badge prefile-badge">Prefile</span>
@@ -1405,7 +1497,7 @@ function prefileCardHTML(r){
 function specialCardHTML(entry){
   const row = data.find(d=>d.n===entry.n);
   const regularNote = row ? `Regular session <b>${fmt(row.start)}</b>` : "";
-  return `<div class="state-card state-card--special" data-scroll-date="${entry.date}">
+  return `<div class="state-card state-card--special" data-scroll-date="${entry.date}" data-state="${entry.n}">
     <div class="state-row-top">
       <div class="state-name"><span class="state-code">${stateCode(entry.n)}</span>${entry.n}</div>
       <span class="badge special-badge">Special Session</span>
@@ -1419,7 +1511,7 @@ function specialCardHTML(entry){
 }
 
 function sessionCardHTML(r){
-  return `<div class="state-card" data-scroll-date="${r.start}">
+  return `<div class="state-card" data-scroll-date="${r.start}" data-state="${r.n}">
     <div class="state-row-top">
       <div class="state-name"><span class="state-code">${stateCode(r.n)}</span>${r.n}</div>
       <div class="badges">${badgesHTML(r)}</div>
@@ -1583,7 +1675,7 @@ function renderMonthView(rows){
       }
       cardsHTML += ev.type==="prefile" ? prefileCardHTML(ev.r) : ev.type==="special" ? specialCardHTML(ev.r) : sessionCardHTML(ev.r);
     });
-    sec.innerHTML = `<div class="month-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${MONTHS_LONG[g.month]} ${g.year} <span class="count">(${g.items.length})</span></h2><div class="abbr-legend"><span><b>XO</b> = Crossover</span><span><b>BID</b> = Bill Introduction Deadline</span></div></div>
+    sec.innerHTML = `<div class="month-head"><h2><svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>${MONTHS_LONG[g.month]} ${g.year} <span class="count">(${g.items.length})</span></h2><div class="abbr-legend"><span><b>XO</b> = Crossover</span><span><b>DL</b> = Bill Introduction Deadline</span></div></div>
       <div class="card-grid">${cardsHTML}</div>`;
     el.appendChild(sec);
   });
@@ -1743,11 +1835,11 @@ function renderStatSummary(){
             : `<div class="stat-empty">None right now.</div>`}
         </div>
         <div class="stat-group" style="--group-color:var(--emerald-600);">
-          <div class="stat-group-label">${iconBadge(ICON_PLAY, 'var(--emerald-600)', 16)}Starting Soon <span class="stat-count">(${startingSoon.length})</span></div>
+          <div class="stat-group-label">${iconBadge(ICON_PLAY, 'var(--emerald-600)', 16)}Starting Within 30d <span class="stat-count">(${startingSoon.length})</span></div>
           ${chipsOrEmpty(startingSoon, "chip-soon", "session", "soon", "None in the next 30 days.")}
         </div>
         <div class="stat-group" style="--group-color:var(--amber-600);">
-          <div class="stat-group-label">${iconBadge(ICON_HOURGLASS, 'var(--amber-600)', 16)}Ending Soon <span class="stat-count">(${endingSoon.length})</span></div>
+          <div class="stat-group-label">${iconBadge(ICON_HOURGLASS, 'var(--amber-600)', 16)}Ending Within 30d <span class="stat-count">(${endingSoon.length})</span></div>
           ${chipsOrEmpty(endingSoon, "chip-urgent", "session", "urgent", "None in the next 30 days.")}
         </div>
       </div>
@@ -1891,9 +1983,13 @@ function jumpToCard(stateName, cardType){
     const cardClass = cardType==="prefile" ? ".state-card--prefile"
       : cardType==="special" ? ".state-card--special"
       : ".state-card:not(.state-card--prefile):not(.state-card--special)";
-    const target = [...document.querySelectorAll(`${cardClass} .state-name`)]
-      .find(el => el.textContent === stateName)
-      ?.closest(".state-card");
+    // Match by a dedicated data-state attribute, not by reading the
+    // visible name text — that broke silently once the small state-code
+    // tag was added inside .state-name, since textContent then included
+    // both the code AND the name concatenated ("CACalifornia"), which
+    // never exactly equals "California". This is decoupled from however
+    // the name is visually displayed, so it can't break the same way again.
+    const target = document.querySelector(`${cardClass}[data-state="${stateName}"]`);
     if(!target) return;
     target.scrollIntoView({behavior:"smooth", block:"center"});
     target.classList.add("jump-highlight");
@@ -1936,8 +2032,49 @@ function renderYearToggle(){
   });
 }
 
+// Timeline sort — defaults to alphabetical (matches how the rows were
+// always implicitly ordered before), with Convene Date and Days Left
+// as the two other genuinely useful orderings for a Gantt-style view.
+let timelineSort = "name";
+function renderTimelineSort(){
+  const options = [
+    {key:"name", label:"State (A–Z)"},
+    {key:"start", label:"Convene Date"},
+    {key:"status", label:"Days Left"}
+  ];
+  document.getElementById("timeline-sort").innerHTML =
+    `<span class="timeline-sort-label">Sort:</span>` +
+    options.map(o=>`<button data-sort="${o.key}" class="${timelineSort===o.key?'active':''}">${o.label}</button>`).join("");
+  document.querySelectorAll("#timeline-sort button").forEach(btn=>{
+    btn.onclick = ()=>{ timelineSort = btn.dataset.sort; renderTimelineView(); };
+  });
+}
+function sortTimelineRows(rows){
+  const sorted = [...rows];
+  if(timelineSort==="name") sorted.sort((a,b)=> a.n.localeCompare(b.n));
+  else if(timelineSort==="start") sorted.sort((a,b)=> new Date(a.start)-new Date(b.start));
+  else if(timelineSort==="status"){
+    // "Days left" only really means something for an active session —
+    // active-and-ending-soonest first, then upcoming (soonest to start),
+    // then already-complete sessions last.
+    const today = new Date(); today.setHours(0,0,0,0);
+    const rank = r=>{
+      const s = new Date(r.start+"T00:00:00"), e = new Date(r.end+"T00:00:00");
+      if(today>=s && today<=e) return [0, e-today];
+      if(today<s) return [1, s-today];
+      return [2, 0];
+    };
+    sorted.sort((a,b)=>{
+      const ra = rank(a), rb = rank(b);
+      return ra[0]!==rb[0] ? ra[0]-rb[0] : ra[1]-rb[1];
+    });
+  }
+  return sorted;
+}
+
 function renderTimelineView(){
   renderYearToggle();
+  renderTimelineSort();
   const bounds = yearBounds(timelineYear);
   const today = new Date(); today.setHours(0,0,0,0);
   const todayInThisYear = today.getFullYear()===timelineYear;
@@ -1953,6 +2090,7 @@ function renderTimelineView(){
   let rows = applyFilters(data);
   if(filters.special) rows = rows.filter(r => specialSessions.some(sp=>sp.n===r.n));
   if(filters.status) rows = rows.filter(r => matchesStatus(r, filters.status));
+  rows = sortTimelineRows(rows);
 
   const body = document.getElementById("timeline-body");
   if(rows.length === 0){
@@ -2029,6 +2167,11 @@ function render(){
   document.getElementById("result-count").textContent = `Showing ${rows.length} of ${data.length} states`;
   renderMonthView(rows);
   renderTableView(rows);
+  // Was missing — meant every filter/search change updated By Month and
+  // By State but silently left Timeline showing stale results if you
+  // were already on that tab. Timeline only ever refreshed on tab-switch
+  // or year-toggle, never on an actual filter change.
+  renderTimelineView();
 }
 
 function setActiveTab(id){
