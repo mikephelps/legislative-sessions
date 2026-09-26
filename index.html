@@ -1312,13 +1312,12 @@ const data = [
 {n:"District of Columbia",start:"2027-01-02",end:"2027-12-31",carry26:false,carry27:false}
 ];
 
-// PLACEHOLDER DATA — not real special session dates. We have no actual
-// source for these yet; this is here purely to demonstrate the card
-// concept. Swap for real data (or a live feed) before shipping.
+// Empty until there's a real source for special session data. All the
+// UI built for this (the stat-summary group, the timeline bolt markers,
+// the "Special sessions" filter) already handles an empty array
+// gracefully — this just needs real entries dropped in whenever that
+// data exists, no code changes required.
 const specialSessions = [
-  {n:"Texas", date:"2026-10-15", reason:"Redistricting"},
-  {n:"California", date:"2026-11-06", reason:"Wildfire relief funding"},
-  {n:"Ohio", date:"2027-02-22", reason:"Budget shortfall"}
 ];
 
 function fmt(d){
