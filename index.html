@@ -853,6 +853,23 @@
     white-space:nowrap;
   }
   .tag.crossover{color:var(--sky-700);border:1px solid var(--sky-600);}
+  .tag.dual-bid{cursor:pointer;}
+  .bid-caret{width:11px;height:11px;flex:none;transition:transform .15s ease;}
+  .tag.dual-bid[aria-expanded="true"] .bid-caret{transform:rotate(180deg);}
+  .bid-detail{
+    display:none;
+    flex-basis:100%;
+    gap:14px;
+    padding:8px 10px;
+    background:var(--teal-50, #F0FDFA);
+    border:1px solid var(--teal-600);
+    border-radius:var(--radius-md);
+    font-family:'Satoshi',sans-serif;
+    font-size:11.5px;
+    color:var(--slate-700);
+  }
+  .bid-detail.open{display:flex;}
+  .bid-detail b{color:var(--teal-700);font-family:'Plus Jakarta Sans',sans-serif;font-weight:700;margin-right:4px;}
   .tag.bid{color:var(--teal-700);border:1px solid var(--teal-600);}
   .tag .cdot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none;}
 
@@ -1151,7 +1168,7 @@
          from an actual data-refresh timestamp, not just "today", since
          a dynamically-computed today's-date here would misleadingly
          imply the underlying data was actually refreshed today. -->
-    <p class="hero-updated">Last updated on September 16, 2026</p>
+    <p class="hero-updated">Last updated on September 26, 2026</p>
   </div>
 </div>
 
@@ -1242,56 +1259,57 @@
 <script>
 
 const data = [
-{n:"Alabama",start:"2027-02-02",end:"2027-05-13",prefile:"2026-12-01",carry26:false,carry27:false},
-{n:"Alaska",start:"2027-01-19",end:"2027-05-19",prefile:"2027-01-08",carry26:false,carry27:true},
-{n:"Arizona",start:"2027-04-11",end:"2027-05-21",prefile:"2026-11-15",carry26:false,carry27:false},
-{n:"Arkansas",start:"2027-01-11",end:"2027-04-28",prefile:"2026-11-15",carry26:false,carry27:false},
-{n:"California",start:"2026-06-01",end:"2026-10-02",crossover:"2027-06-04",bid:"2027-02-15",carry26:false,carry27:true},
-{n:"Colorado",start:"2027-01-11",end:"2027-05-10",prefile:"2026-12-01",bid:"2027-02-01",carry26:false,carry27:false},
+{n:"Alabama",start:"2027-02-02",end:"2027-05-13",adjournEst:true,prefile:"2026-12-01",carry26:false,carry27:false},
+{n:"Alaska",start:"2027-01-19",end:"2027-05-19",adjournEst:true,prefile:"2027-01-08",carry26:false,carry27:true},
+{n:"Arizona",start:"2027-01-11",end:"2027-05-21",prefile:"2026-11-15",carry26:false,carry27:false},
+{n:"Arkansas",start:"2027-01-11",end:"2027-04-28",adjournEst:true,prefile:"2026-11-15",carry26:false,carry27:false},
+{n:"California",start:"2026-12-07",end:"2027-09-10",adjournEst:true,bid:"2027-02-19",crossover:"2027-06-04",carry26:false,carry27:true},
+{n:"Colorado",start:"2027-01-11",end:"2027-05-10",prefile:"2026-12-01",carry26:false,carry27:false},
 {n:"Connecticut",start:"2027-01-06",end:"2027-06-09",carry26:false,carry27:false},
 {n:"Delaware",start:"2027-01-12",end:"2027-06-30",prefile:"2026-12-15",carry26:false,carry27:true},
-{n:"Florida",start:"2027-03-02",end:"2027-04-30",prefile:"2026-08-01",carry26:false,carry27:false},
-{n:"Georgia",start:"2027-01-11",end:"2027-03-31",prefile:"2026-11-15",bid:"2027-02-01",carry26:false,carry27:true},
-{n:"Hawaii",start:"2027-01-20",end:"2027-05-07",prefile:"2027-01-13",carry26:false,carry27:true},
-{n:"Idaho",start:"2027-01-11",end:"2027-04-02",carry26:false,carry27:false},
-{n:"Illinois",start:"2027-01-13",end:"2027-05-31",prefile:"2026-12-03",carry26:false,carry27:true},
+{n:"Florida",start:"2027-03-02",end:"2027-04-30",bid:"2027-03-02",prefile:"2026-08-01",carry26:false,carry27:false},
+{n:"Georgia",start:"2027-01-11",end:"2027-03-31",adjournEst:true,prefile:"2026-11-15",carry26:false,carry27:true},
+{n:"Hawaii",start:"2027-01-20",end:"2027-05-07",adjournEst:true,bid:"2027-01-27",crossover:"2027-03-11",prefile:"2027-01-11",carry26:false,carry27:true},
+{n:"Idaho",start:"2027-01-11",end:"2027-04-02",adjournEst:true,carry26:false,carry27:false},
+{n:"Illinois",start:"2027-01-13",end:"2027-05-31",adjournEst:true,prefile:"2026-12-03",carry26:false,carry27:true},
 {n:"Indiana",start:"2027-01-12",end:"2027-04-29",prefile:"2026-11-17",carry26:false,carry27:false},
-{n:"Iowa",start:"2027-01-11",end:"2027-04-30",crossover:"2027-03-19",bid:"2027-02-05",prefile:"2026-12-01",carry26:false,carry27:true},
-{n:"Kansas",start:"2027-01-11",end:"2027-05-07",prefile:"2026-11-04",carry26:false,carry27:true},
+{n:"Iowa",start:"2027-01-11",end:"2027-04-30",bid:"2027-02-12",crossover:"2027-03-19",prefile:"2026-12-01",carry26:false,carry27:true},
+{n:"Kansas",start:"2027-01-11",end:"2027-05-07",adjournEst:true,prefile:"2026-11-04",carry26:false,carry27:true},
 {n:"Kentucky",start:"2027-01-05",end:"2027-03-30",prefile:"2026-09-01",carry26:false,carry27:false},
 {n:"Louisiana",start:"2027-04-12",end:"2027-06-10",prefile:"2027-01-25",carry26:false,carry27:false},
-{n:"Maine",start:"2026-09-17",end:"2027-10-16",carry26:false,carry27:true},
+{n:"Maine",start:"2026-12-02",end:"2027-06-30",carry26:false,carry27:true},
 {n:"Maryland",start:"2027-01-13",end:"2027-04-12",prefile:"2026-11-20",carry26:false,carry27:false},
-{n:"Massachusetts",start:"2027-01-06",end:"2027-11-17",carry26:false,carry27:true},
+{n:"Massachusetts",start:"2027-01-06",end:"2027-11-17",adjournEst:true,carry26:false,carry27:true},
 {n:"Michigan",start:"2027-01-13",end:"2027-12-31",carry26:false,carry27:true},
 {n:"Minnesota",start:"2027-01-12",end:"2027-05-17",carry26:false,carry27:true},
 {n:"Mississippi",start:"2027-01-05",end:"2027-05-10",prefile:"2026-11-01",carry26:false,carry27:false},
 {n:"Missouri",start:"2027-01-06",end:"2027-05-14",prefile:"2026-12-01",carry26:false,carry27:false},
 {n:"Montana",start:"2027-01-04",end:"2027-04-30",prefile:"2026-05-11",carry26:false,carry27:false},
-{n:"Nebraska",start:"2027-01-06",end:"2027-06-01",carry26:false,carry27:true},
-{n:"Nevada",start:"2027-02-01",end:"2027-05-31",crossover:"2027-04-20",prefile:"2026-05-11",carry26:false,carry27:false},
-{n:"New Hampshire",start:"2027-01-06",end:"2027-06-30",crossover:"2027-01-15",prefile:"2026-09-01",carry26:false,carry27:true},
+{n:"Nebraska",start:"2027-01-06",end:"2027-06-04",carry26:false,carry27:true},
+{n:"Nevada",start:"2027-02-01",end:"2027-05-31",bid:"2027-03-15",crossover:"2027-04-20",prefile:"2026-05-11",carry26:false,carry27:false},
+{n:"New Hampshire",start:"2027-01-06",end:"2027-06-30",bid:"2027-01-15",prefile:"2026-09-01",carry26:false,carry27:true},
 {n:"New Jersey",start:"2027-01-12",end:"2028-01-11",carry26:true,carry27:false},
-{n:"New Mexico",start:"2027-01-19",end:"2027-03-20",prefile:"2027-01-02",carry26:false,carry27:false},
-{n:"New York",start:"2027-01-06",end:"2027-06-10",prefile:"2026-11-15",carry26:false,carry27:true},
-{n:"North Carolina",start:"2027-01-13",end:"2027-07-30",carry26:false,carry27:true},
-{n:"North Dakota",start:"2027-01-05",end:"2027-04-30",crossover:"2027-02-26",prefile:"2026-12-01",carry26:false,carry27:false},
+{n:"New Mexico",start:"2027-01-19",end:"2027-03-20",bid:"2027-02-18",prefile:"2027-01-04",carry26:false,carry27:false},
+{n:"New York",start:"2027-01-06",end:"2027-06-10",adjournEst:true,prefile:"2026-11-15",carry26:false,carry27:true},
+{n:"North Carolina",start:"2027-01-13",end:"2027-07-30",adjournEst:true,carry26:false,carry27:true},
+{n:"North Dakota",start:"2027-01-05",end:"2027-04-30",bidHouse:"2027-01-18",bidSenate:"2027-01-25",crossover:"2027-02-26",prefile:"2026-12-01",carry26:false,carry27:false},
 {n:"Ohio",start:"2027-01-04",end:"2027-12-31",carry26:false,carry27:true},
-{n:"Oklahoma",start:"2027-02-01",end:"2027-05-28",crossover:"2027-03-25",prefile:"2026-11-15",carry26:false,carry27:true},
+{n:"Oklahoma",start:"2027-02-01",end:"2027-05-28",bid:"2027-01-14",crossover:"2027-03-25",prefile:"2026-11-15",carry26:false,carry27:true},
 {n:"Oregon",start:"2027-01-11",end:"2027-06-19",prefile:"2026-12-11",carry26:false,carry27:false},
 {n:"Pennsylvania",start:"2027-01-05",end:"2027-12-31",prefile:"2026-12-15",carry26:false,carry27:true},
-{n:"Rhode Island",start:"2027-01-05",end:"2027-06-30",prefile:"2026-11-15",carry26:false,carry27:false},
+{n:"Rhode Island",start:"2027-01-05",end:"2027-06-30",adjournEst:true,prefile:"2026-11-15",carry26:false,carry27:false},
 {n:"South Carolina",start:"2027-01-12",end:"2027-05-13",prefile:"2026-11-09",carry26:false,carry27:true},
-{n:"South Dakota",start:"2027-01-12",end:"2027-03-31",crossover:"2027-02-24",prefile:"2026-12-13",carry26:false,carry27:false},
+{n:"South Dakota",start:"2027-01-12",end:"2027-03-31",bid:"2027-02-03",crossover:"2027-02-23",prefile:"2026-12-13",carry26:false,carry27:false},
 {n:"Tennessee",start:"2027-01-12",end:"2027-04-22",prefile:"2026-11-04",carry26:false,carry27:true},
-{n:"Texas",start:"2027-01-12",end:"2027-05-31",crossover:"2027-05-14",bid:"2027-02-28",prefile:"2026-11-09",carry26:false,carry27:false},
-{n:"Utah",start:"2027-01-19",end:"2027-03-05",crossover:"2027-03-02",prefile:"2026-05-06",carry26:false,carry27:false},
-{n:"Vermont",start:"2027-01-06",end:"2027-05-14",prefile:"2026-12-15",carry26:false,carry27:true},
-{n:"Virginia",start:"2027-01-13",end:"2027-02-27",prefile:"2026-07-20",carry26:true,carry27:false},
+{n:"Texas",start:"2027-01-12",end:"2027-05-31",bid:"2027-03-12",crossover:"2027-05-14",prefile:"2026-11-09",carry26:false,carry27:false},
+{n:"Utah",start:"2027-01-19",end:"2027-03-05",bid:"2027-01-29",crossover:"2027-03-02",prefile:"2026-05-06",carry26:false,carry27:false},
+{n:"Vermont",start:"2027-01-06",end:"2027-05-14",adjournEst:true,prefile:"2026-12-15",carry26:false,carry27:true},
+{n:"Virginia",start:"2027-01-13",end:"2027-02-27",adjournEst:true,prefile:"2026-07-20",carry26:true,carry27:false},
 {n:"Washington",start:"2027-01-11",end:"2027-04-26",prefile:"2026-12-01",carry26:false,carry27:true},
-{n:"West Virginia",start:"2027-01-13",end:"2027-03-13",crossover:"2027-03-03",prefile:"2026-12-14",carry26:false,carry27:true},
+{n:"West Virginia",start:"2027-01-13",end:"2027-03-13",bidHouse:"2027-02-16",bidSenate:"2027-02-22",crossover:"2027-03-03",prefile:"2026-12-14",carry26:false,carry27:true},
 {n:"Wisconsin",start:"2027-01-04",end:"2027-12-31",carry26:false,carry27:true},
-{n:"Wyoming",start:"2027-01-12",end:"2027-03-08",crossover:"2027-02-10",prefile:"2026-05-26",carry26:false,carry27:false}
+{n:"Wyoming",start:"2027-01-12",end:"2027-03-08",bidHouse:"2027-02-01",bidSenate:"2027-01-27",crossover:"2027-02-10",prefile:"2026-05-26",carry26:false,carry27:false},
+{n:"District of Columbia",start:"2027-01-02",end:"2027-12-31",carry26:false,carry27:false}
 ];
 
 // PLACEHOLDER DATA — not real special session dates. We have no actual
@@ -1308,6 +1326,10 @@ function fmt(d){
   const dt = new Date(d+"T00:00:00");
   return dt.toLocaleDateString('en-US',{month:'numeric',day:'numeric',year:'2-digit'});
 }
+// Appends "(est.)" wherever an adjourn date is actually displayed —
+// sourced directly from the "(proj)" markers in the state's own source
+// spreadsheet, not a guess on our part.
+function adjournLabel(r){ return r.adjournEst ? " (est.)" : ""; }
 
 let sortKey = "start", sortDir = 1, userSorted = false;
 let filters = {q:"", prefile:false, carry:false, special:false, status:null};
@@ -1367,7 +1389,18 @@ function daysStatHTML(r){
 // introduced before the chamber crossover deadline).
 function chipRowHTML(r){
   let html = "";
-  if(r.bid) html += `<span class="tag bid"><i class="cdot"></i>DL ${fmt(r.bid)}</span>`;
+  if(r.bidHouse && r.bidSenate){
+    // Neutral "how many, not which one" chip — deliberately doesn't
+    // pick a chamber to feature. Expands on click/tap (not hover, since
+    // hover doesn't exist on mobile) to show both dates, clearly labeled.
+    html += `<span class="tag bid dual-bid" aria-expanded="false"><i class="cdot"></i>Bill Intro Deadlines (2)<svg class="bid-caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg></span>
+      <div class="bid-detail">
+        <div><b>House</b> ${fmt(r.bidHouse)}</div>
+        <div><b>Senate</b> ${fmt(r.bidSenate)}</div>
+      </div>`;
+  } else if(r.bid){
+    html += `<span class="tag bid"><i class="cdot"></i>DL ${fmt(r.bid)}</span>`;
+  }
   if(r.crossover) html += `<span class="tag crossover"><i class="cdot"></i>XO ${fmt(r.crossover)}</span>`;
   // Always render the container, even empty — reserving this space
   // consistently keeps a plain session card's internal rhythm matching
@@ -1424,7 +1457,7 @@ function sessionStatusText(r){
 function meterHTML(r){
   const pct = sessionElapsedPct(r);
   return `<div class="yearmeter"><div class="fill" style="left:0%;width:${pct}%;"></div></div>
-    <div class="meter-dates"><span>${fmt(r.start)}</span><span>${fmt(r.end)}</span></div>`;
+    <div class="meter-dates"><span>${fmt(r.start)}</span><span>${fmt(r.end)}${adjournLabel(r)}</span></div>`;
 }
 
 // Compact bar-only variant for the table view — no date labels, since
@@ -1705,7 +1738,7 @@ function renderTableView(rows){
       <td data-label="Status">${tableStatusHTML(r)}</td>
       <td class="mono col-prefile" data-label="Prefile">${fmt(r.prefile)}</td>
       <td class="mono col-session" data-label="Convene">${fmt(r.start)}</td>
-      <td class="mono col-session" data-label="Adjourn">${fmt(r.end)}</td>
+      <td class="mono col-session" data-label="Adjourn">${fmt(r.end)}${adjournLabel(r)}</td>
       <td class="mono col-crossover" data-label="Crossover">${fmt(r.crossover)}</td>
       <td data-label="Carries to '28"><span class="${r.carry27?'yes':'no'}">${r.carry27?'Yes':'No'}</span></td>
     </tr>
@@ -1728,7 +1761,8 @@ const STATE_CODE = {
   "New Mexico":"NM","New York":"NY","North Carolina":"NC","North Dakota":"ND","Ohio":"OH",
   "Oklahoma":"OK","Oregon":"OR","Pennsylvania":"PA","Rhode Island":"RI","South Carolina":"SC",
   "South Dakota":"SD","Tennessee":"TN","Texas":"TX","Utah":"UT","Vermont":"VT",
-  "Virginia":"VA","Washington":"WA","West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY"
+  "Virginia":"VA","Washington":"WA","West Virginia":"WV","Wisconsin":"WI","Wyoming":"WY",
+  "District of Columbia":"DC"
 };
 function stateCode(name){ return STATE_CODE[name] || name.slice(0,2).toUpperCase(); }
 
@@ -1871,7 +1905,7 @@ function statChipInfo(r, infoType){
   }
   if(infoType==="special") return `${r.reason} &middot; ${fmt(r.date)}`;
   if(infoType==="soon") return `Convenes ${fmt(r.start)}`;
-  if(infoType==="urgent") return `Adjourns ${fmt(r.end)}`;
+  if(infoType==="urgent") return `Adjourns ${fmt(r.end)}${adjournLabel(r)}`;
   return "";
 }
 // Generic popover renderer, shared by the stat-summary chips (which get
@@ -1923,7 +1957,7 @@ function timelineMarkerInfo(el){
     const r = data.find(d=>d.n===stateName);
     if(!r) return null;
     const total = daysBetween(r.start, r.end);
-    return { title: stateName, info: `Convenes ${fmt(r.start)} &middot; Adjourns ${fmt(r.end)} &middot; ${total} days total &middot; ${sessionStatusText(r).replace(/<[^>]+>/g,"")}` };
+    return { title: stateName, info: `Convenes ${fmt(r.start)} &middot; Adjourns ${fmt(r.end)}${adjournLabel(r)} &middot; ${total} days total &middot; ${sessionStatusText(r).replace(/<[^>]+>/g,"")}` };
   }
   if(type==="prefile"){
     const r = data.find(d=>d.n===stateName);
@@ -2234,6 +2268,19 @@ document.querySelectorAll("thead th").forEach(th=>{
     if(sortKey===key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
     renderTableView(applyFilters(data));
   });
+});
+
+// Event delegation (attached once) rather than re-binding a click
+// handler on every card re-render — works identically for tap on
+// mobile and click on desktop, no separate interaction model needed.
+document.addEventListener("click", (e)=>{
+  const chip = e.target.closest(".dual-bid");
+  if(!chip) return;
+  const panel = chip.nextElementSibling;
+  if(!panel || !panel.classList.contains("bid-detail")) return;
+  const expanded = chip.getAttribute("aria-expanded") === "true";
+  chip.setAttribute("aria-expanded", expanded ? "false" : "true");
+  panel.classList.toggle("open", !expanded);
 });
 
 renderStatSummary();
